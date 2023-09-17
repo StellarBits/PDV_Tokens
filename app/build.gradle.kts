@@ -55,10 +55,13 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
-    //Koin
+    // Koin
     implementation("io.insert-koin:koin-core:$koinVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion")
     implementation("io.insert-koin:koin-android:$koinVersion")
+
+    // Printer
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
