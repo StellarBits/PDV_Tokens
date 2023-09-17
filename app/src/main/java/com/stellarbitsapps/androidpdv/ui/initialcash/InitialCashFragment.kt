@@ -30,6 +30,11 @@ class InitialCashFragment : Fragment() {
             findNavController().navigate(direction)
         }
 
+        binding.btRegisterToken.setOnClickListener {
+            val direction = InitialCashFragmentDirections.actionInitialCashFragmentToRegisterTokenFragment()
+            findNavController().navigate(direction)
+        }
+
         return binding.root
     }
 

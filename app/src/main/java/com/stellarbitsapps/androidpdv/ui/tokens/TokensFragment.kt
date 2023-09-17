@@ -58,33 +58,10 @@ class TokensFragment : Fragment() {
         if (n < 0) {
             return
         }
-        val str_space = StringBuilder()
+        val strSpace = StringBuilder()
         for (i in 0 until n) {
-            str_space.append("\n")
+            strSpace.append("\n")
         }
-        printHelper.printData(str_space.toString(), 32, 0, false, 1, 80, 0)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Room example
-        /* val token = Tokens(
-            value = 1.0f,
-            cashOne = 1,
-            cashTwo = 0,
-            cashFour = 0,
-            cashFive = 0,
-            cashSix = 0,
-            cashEight = 0,
-            cashTen = 0
-        )
-
-        viewModel.setToken(token)
-
-        lifecycle.coroutineScope.launch {
-            val list = viewModel.getTokens()
-            Log.i("JAO", "Tokens: $list")
-        } */
+        printHelper.printData(strSpace.toString(), 32, 0, false, 1, 80, 0)
     }
 }

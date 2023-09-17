@@ -13,6 +13,9 @@
             android:id="@+id/action_initialCashFragment_to_tokensFragment"
             app:destination="@id/tokensFragment"
             app:enterAnim="@android:anim/fade_in" />
+        <action
+            android:id="@+id/action_initialCashFragment_to_registerTokenFragment"
+            app:destination="@id/registerTokenFragment" />
     </fragment>
     <fragment
         android:id="@+id/tokensFragment"
@@ -28,4 +31,9 @@
         android:name="com.stellarbitsapps.androidpdv.ui.finalcash.FinalCashFragment"
         android:label="fragment_final_cash"
         tools:layout="@layout/fragment_final_cash" />
+    <fragment
+        android:id="@+id/registerTokenFragment"
+        android:name="com.stellarbitsapps.androidpdv.ui.registertokens.RegisterTokenFragment"
+        android:label="fragment_register_token"
+        tools:layout="@layout/fragment_register_token" />
 </navigation>
