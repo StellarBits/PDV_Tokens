@@ -10,8 +10,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Do nothing
-    }
+//    @Deprecated("Deprecated in Java")
+//    override fun onBackPressed() {
+//        // Do nothing
+//    }
 }
