@@ -3,9 +3,9 @@ package com.stellarbitsapps.androidpdv.ui.adapter
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 
 class TokensListener(
-    val clickListener: (tokens: Tokens) -> Unit,
+    val clickListener: (token: Tokens) -> Unit,
 ) {
-    fun onClick(tokens: Tokens) {
-        clickListener(tokens)
+    fun onClick(token: Tokens) {
+        clickListener(token)
     }
 }

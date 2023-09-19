@@ -11,7 +11,7 @@ import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.TokensItemBinding
 
 class TokensAdapter(
-    private val tokensListener: (tokens: Tokens) -> Unit
+    private val tokensListener: TokensListener
 ) : ListAdapter<Tokens, TokensAdapter.TokensViewHolder>(DiffCallback) {
 
     companion object {
@@ -26,33 +26,24 @@ class TokensAdapter(
         }
     }
 
-    class TokensViewHolder(binding: TokensItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        private val button: Button = binding.btToken
-
+    class TokensViewHolder(private val binding: TokensItemBinding) : RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(item: Tokens) {
-            button.text = "R$ " + String.format("%.2f", item.value)
+        fun bind(item: Tokens, buttonListener: TokensListener) {
+            with(binding) {
+                btToken.text = "R$ " + String.format("%.2f", item.value)
+                token = item
+                listener = buttonListener
+                executePendingBindings()
+            }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TokensViewHolder {
-        val viewHolder = TokensViewHolder(
-            TokensItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
-
-        viewHolder.itemView.setOnClickListener {
-            val position = viewHolder.adapterPosition
-            tokensListener(getItem(position))
-        }
-
-        return viewHolder
+        return TokensViewHolder(TokensItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: TokensViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val item = getItem(position) as Tokens
+        holder.bind(item, tokensListener)
     }
 }
