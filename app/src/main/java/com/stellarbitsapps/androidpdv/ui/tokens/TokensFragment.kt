@@ -1,11 +1,16 @@
 package com.stellarbitsapps.androidpdv.ui.tokens
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
@@ -18,6 +23,16 @@ import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensListener
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
+
+
+// Storage Permissions
+const val REQUEST_EXTERNAL_STORAGE = 1
+val PERMISSIONS_STORAGE = arrayOf(
+    Manifest.permission.READ_EXTERNAL_STORAGE,
+    Manifest.permission.WRITE_EXTERNAL_STORAGE
+)
 
 class TokensFragment : Fragment() {
 
@@ -113,9 +128,36 @@ class TokensFragment : Fragment() {
     }
 
     private fun printToken(formOfPayment: String) {
+        val path = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
+        val file = File(path)
+
+        Log.i("JAO", "path: $path")
         printSpace(3)
-        printHelper.printData(formOfPayment, 100, 0, false, 1, 80, 0)
-        printSpace(3)
+        //printHelper.printTextWithAttributes("R$ 2,00", mapOf(Pair("key_attributes_reverse", 1), Pair("key_attributes_textsize", 120)))
+
+        // Check if we have write permission
+        val permission = ActivityCompat.checkSelfPermission(
+            requireActivity(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                PERMISSIONS_STORAGE,
+                REQUEST_EXTERNAL_STORAGE
+            )
+        } else {
+            if (file.exists()) {
+                val b = BitmapFactory.decodeStream(FileInputStream(path))
+                printHelper.printBitmap(b, 2, 80)
+            }
+        }
+
+        printHelper.printData("Teste", 100, 0, false, 0, 80, 0)
+
+        printSpace(5)
         printHelper.printStart()
         printHelper.cutPaper(1)
 
@@ -131,12 +173,12 @@ class TokensFragment : Fragment() {
 //        printHelper.cutPaper(1)
     }
 
-    private fun printSpace(n: Int) {
-        if (n < 0) {
+    private fun printSpace(spaceSize: Int) {
+        if (spaceSize < 0) {
             return
         }
         val strSpace = StringBuilder()
-        for (i in 0 until n) {
+        for (i in 0 until spaceSize) {
             strSpace.append("\n")
         }
         printHelper.printData(strSpace.toString(), 32, 0, false, 1, 80, 0)

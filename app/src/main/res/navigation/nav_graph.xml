@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_initialCashFragment_to_registerTokenFragment"
             app:destination="@id/registerTokenFragment" />
+        <action
+            android:id="@+id/action_initialCashFragment_to_configureTokenLayoutFragment"
+            app:destination="@id/configureTokenLayoutFragment" />
     </fragment>
     <fragment
         android:id="@+id/tokensFragment"
@@ -36,4 +39,9 @@
         android:name="com.stellarbitsapps.androidpdv.ui.registertokens.RegisterTokenFragment"
         android:label="fragment_register_token"
         tools:layout="@layout/fragment_register_token" />
+    <fragment
+        android:id="@+id/configureTokenLayoutFragment"
+        android:name="com.stellarbitsapps.androidpdv.ui.configuretokenlayout.ConfigureTokenLayoutFragment"
+        android:label="fragment_configure_token_layout"
+        tools:layout="@layout/fragment_configure_token_layout" />
 </navigation>
