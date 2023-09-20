@@ -13,5 +13,5 @@ interface TokensDao {
     fun getAll(): Flow<List<Tokens>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(vararg users: Tokens)
+    suspend fun insertAll(vararg tokens: Tokens)
 }

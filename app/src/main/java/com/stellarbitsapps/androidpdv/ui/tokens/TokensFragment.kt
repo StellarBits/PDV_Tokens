@@ -1,8 +1,6 @@
 package com.stellarbitsapps.androidpdv.ui.tokens
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
@@ -10,29 +8,25 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.app.ActivityCompat
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
+import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensListener
+import com.stellarbitsapps.androidpdv.util.Utils
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
-
-
-// Storage Permissions
-const val REQUEST_EXTERNAL_STORAGE = 1
-val PERMISSIONS_STORAGE = arrayOf(
-    Manifest.permission.READ_EXTERNAL_STORAGE,
-    Manifest.permission.WRITE_EXTERNAL_STORAGE
-)
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
 class TokensFragment : Fragment() {
 
@@ -42,7 +36,8 @@ class TokensFragment : Fragment() {
 
     private val viewModel: TokensViewModel by activityViewModels {
         TokensViewModelFactory(
-            (requireActivity().application as AndroidPdvApplication).database.tokensDao()
+            (requireActivity().application as AndroidPdvApplication).database.tokensDao(),
+            (requireActivity().application as AndroidPdvApplication).database.reportDao()
         )
     }
 
@@ -71,6 +66,7 @@ class TokensFragment : Fragment() {
         binding.btClean.setOnClickListener {
             binding.tvTotaValue.text = "R$ 0,00"
             tokenSum = 0f
+            selectedTokensList.clear()
         }
 
         binding.btExit.setOnClickListener {
@@ -127,50 +123,32 @@ class TokensFragment : Fragment() {
         }
     }
 
-    private fun printToken(formOfPayment: String) {
-        val path = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
-        val file = File(path)
+    @SuppressLint("SimpleDateFormat")
+    private fun printToken(tokenValue: String) {
+        val calendar = Calendar.getInstance()
+        val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
+        val date = format.format(calendar.time)
 
-        Log.i("JAO", "path: $path")
+        val imgFile = File(Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg")
+        val myBitmap = BitmapFactory.decodeFile(imgFile.toString())
+
+        val tokenLayout = layoutInflater.inflate(R.layout.token_layout, null)
+
+        tokenLayout.findViewById<TextView>(R.id.tv_token_value).text = tokenValue
+        tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
+
+        //tokenImage = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
+
+        val bitmap = Utils.createBitmapFromConstraintLayout(tokenLayout)
+
+        printHelper.printData("FESTA DE SÃO JUDAS TADEU 2023", 35, 0, false, 1, 80, 0)
+        printHelper.printData("VALE R$ 2,00", 80, 0, false, 1, 80, 0)
+        printHelper.printBitmap(bitmap, 2, 80)
+        printHelper.printData(date, 30, 0, false, 0, 80, 0)
+        printHelper.printData("AGRADECEMOS SUA PRESENÇA!", 40, 0, false, 0, 80, 0)
         printSpace(3)
-        //printHelper.printTextWithAttributes("R$ 2,00", mapOf(Pair("key_attributes_reverse", 1), Pair("key_attributes_textsize", 120)))
-
-        // Check if we have write permission
-        val permission = ActivityCompat.checkSelfPermission(
-            requireActivity(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                PERMISSIONS_STORAGE,
-                REQUEST_EXTERNAL_STORAGE
-            )
-        } else {
-            if (file.exists()) {
-                val b = BitmapFactory.decodeStream(FileInputStream(path))
-                printHelper.printBitmap(b, 2, 80)
-            }
-        }
-
-        printHelper.printData("Teste", 100, 0, false, 0, 80, 0)
-
-        printSpace(5)
         printHelper.printStart()
         printHelper.cutPaper(1)
-
-        Log.i("JAO", "Click!")
-
-//        printHelper.printData(formOfPayment, 100, 0, false, 1, 80, 0)
-//        printSpace(1)
-//        printHelper.printQRCode("https://www.gertec.com.br", 2, 1)
-//        printSpace(1)
-//        printHelper.printData("Total", 100, 0, false, 1, 80, 0)
-//        printSpace(7)
-//        printHelper.printStart()
-//        printHelper.cutPaper(1)
     }
 
     private fun printSpace(spaceSize: Int) {

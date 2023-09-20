@@ -1,18 +1,23 @@
 package com.stellarbitsapps.androidpdv.ui.initialcash
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
+import com.stellarbitsapps.androidpdv.util.Utils
+import java.text.NumberFormat
+
 
 class InitialCashFragment : Fragment() {
 
@@ -36,6 +41,20 @@ class InitialCashFragment : Fragment() {
             val direction = InitialCashFragmentDirections.actionInitialCashFragmentToTokensFragment()
             findNavController().navigate(direction)
         }
+
+        binding.edtInitialCash.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                Utils.formatCashTextMask(s, binding.edtInitialCash, this)
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                // Do nothing
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                // Do nothing
+            }
+        })
 
         return binding.root
     }

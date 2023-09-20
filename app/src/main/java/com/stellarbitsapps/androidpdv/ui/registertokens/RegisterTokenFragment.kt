@@ -2,6 +2,8 @@ package com.stellarbitsapps.androidpdv.ui.registertokens
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,15 +11,11 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentRegisterTokenBinding
-import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragmentDirections
-import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
-import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModelFactory
+import com.stellarbitsapps.androidpdv.util.Utils
 
 class RegisterTokenFragment : Fragment() {
     companion object {
@@ -39,7 +37,7 @@ class RegisterTokenFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val cashEditTextList = listOf<EditText>(
+        val cashEditTextList = listOf(
             binding.edtCashOne,
             binding.edtCashTwo,
             binding.edtCashFour,
@@ -48,6 +46,20 @@ class RegisterTokenFragment : Fragment() {
             binding.edtCashEight,
             binding.edtCashTen
         )
+
+        binding.edtCashValue.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                Utils.formatCashTextMask(s, binding.edtCashValue, this)
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                // Do nothing
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                // Do nothing
+            }
+        })
 
         cashEditTextList.forEach { cashEditText ->
             cashEditText.setOnClickListener {
@@ -69,8 +81,14 @@ class RegisterTokenFragment : Fragment() {
         }
 
         binding.btRegisterToken.setOnClickListener {
+            val value = binding.edtCashValue.text.toString()
+                .replace("R$", "")
+                .replace(",", ".")
+                .trim()
+                .toFloat()
+
             val token = Tokens(
-                value = binding.edtCashValue.text.toString().toFloat(),
+                value = value,
                 cashOne = cashEditTextList[0].text.toString().toInt(),
                 cashTwo = cashEditTextList[1].text.toString().toInt(),
                 cashFour = cashEditTextList[2].text.toString().toInt(),
