@@ -13,12 +13,6 @@ import kotlinx.coroutines.launch
 
 class TokensViewModel(private val tokensDao: TokensDao, private val reportDao: ReportDao) : ViewModel() {
     fun getTokens(): Flow<List<Tokens>> = tokensDao.getAll()
-
-    fun setReport(report: Report) {
-        viewModelScope.launch(Dispatchers.IO) {
-            reportDao.insertAll(report)
-        }
-    }
 }
 
 class TokensViewModelFactory(

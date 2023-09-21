@@ -8,13 +8,13 @@
 
     <TextView
         android:id="@+id/tv_token_value"
-        android:layout_width="200dp"
+        android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:background="@color/cardview_dark_background"
         android:gravity="center"
         android:textColor="@color/white"
-        android:textSize="44sp"
+        android:textSize="53sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/img_token_image"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,8 +23,8 @@
 
     <ImageView
         android:id="@+id/img_token_image"
-        android:layout_width="140dp"
-        android:layout_height="202dp"
+        android:layout_width="100dp"
+        android:layout_height="145dp"
         android:layout_marginEnd="10dp"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"

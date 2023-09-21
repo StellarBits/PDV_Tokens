@@ -141,12 +141,14 @@ class TokensFragment : Fragment() {
 
         val bitmap = Utils.createBitmapFromConstraintLayout(tokenLayout)
 
+        printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
         printHelper.printData("FESTA DE SÃO JUDAS TADEU 2023", 35, 0, false, 1, 80, 0)
         printHelper.printData("VALE R$ 2,00", 80, 0, false, 1, 80, 0)
         printHelper.printBitmap(bitmap, 2, 80)
         printHelper.printData(date, 30, 0, false, 0, 80, 0)
         printHelper.printData("AGRADECEMOS SUA PRESENÇA!", 40, 0, false, 0, 80, 0)
-        printSpace(3)
+        printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+        printSpace(2)
         printHelper.printStart()
         printHelper.cutPaper(1)
     }

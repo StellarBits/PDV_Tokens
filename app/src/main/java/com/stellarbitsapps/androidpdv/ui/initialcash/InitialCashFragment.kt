@@ -11,10 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stellarbitsapps.androidpdv.R
+import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
+import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
+import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
+import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModelFactory
 import com.stellarbitsapps.androidpdv.util.Utils
 import java.text.NumberFormat
 
@@ -25,7 +30,11 @@ class InitialCashFragment : Fragment() {
         fun newInstance() = InitialCashFragment()
     }
 
-    private lateinit var viewModel: InitialCashViewModel
+    private val viewModel: InitialCashViewModel by activityViewModels {
+        InitialCashViewModelFactory(
+            (requireActivity().application as AndroidPdvApplication).database.reportDao()
+        )
+    }
 
     private val binding: FragmentInitialCashBinding by lazy {
         FragmentInitialCashBinding.inflate(layoutInflater)
@@ -38,6 +47,14 @@ class InitialCashFragment : Fragment() {
         setHasOptionsMenu(true)
 
         binding.button.setOnClickListener {
+            val initialCash = binding.edtInitialCash.text.toString()
+                .replace("R$", "")
+                .replace(",", ".")
+                .trim()
+                .toFloat()
+
+            viewModel.addReport(Report(initialCash = initialCash))
+
             val direction = InitialCashFragmentDirections.actionInitialCashFragmentToTokensFragment()
             findNavController().navigate(direction)
         }
@@ -83,11 +100,4 @@ class InitialCashFragment : Fragment() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(InitialCashViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
-
 }
