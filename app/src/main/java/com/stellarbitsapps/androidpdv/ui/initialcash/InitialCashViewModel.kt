@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stellarbitsapps.androidpdv.database.dao.ReportDao
 import com.stellarbitsapps.androidpdv.database.entity.Report
+import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class InitialCashViewModel(private val reportDao: ReportDao) : ViewModel() {
@@ -14,6 +16,8 @@ class InitialCashViewModel(private val reportDao: ReportDao) : ViewModel() {
             reportDao.insertReport(report)
         }
     }
+
+    fun getLastFinalValue(): Float = reportDao.getLastFinalValue()
 }
 
 class InitialCashViewModelFactory(

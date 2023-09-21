@@ -1,32 +1,32 @@
 package com.stellarbitsapps.androidpdv.ui.tokens
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
+import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensListener
 import com.stellarbitsapps.androidpdv.util.Utils
 import kotlinx.coroutines.launch
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Calendar
+
 
 class TokensFragment : Fragment() {
 
@@ -47,8 +47,6 @@ class TokensFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
 
-    private lateinit var printHelper: AP80PrintHelper
-
     private var tokenSum = 0f
 
     private var selectedTokensList = arrayListOf<Tokens>()
@@ -58,15 +56,10 @@ class TokensFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        printHelper = AP80PrintHelper.getInstance()
-        printHelper.initPrint(requireContext())
-
         initRecyclerView()
 
         binding.btClean.setOnClickListener {
-            binding.tvTotaValue.text = "R$ 0,00"
-            tokenSum = 0f
-            selectedTokensList.clear()
+            clearFields()
         }
 
         binding.btExit.setOnClickListener {
@@ -75,29 +68,43 @@ class TokensFragment : Fragment() {
         }
 
         binding.btCash.setOnClickListener {
+            // Update payment method in database report table
+            val reportToBeUpdated = Report(paymentMethodCash = 1)
+            viewModel.updateReportTokens(reportToBeUpdated)
 
-            Log.i("JAO", "Tokens List: $selectedTokensList")
+            Utils.tokenPayment(viewModel, selectedTokensList)
 
-            selectedTokensList.forEach { token ->
+            showCashChangeDialog()
+        }
 
-                val auxTokensList = listOf(
-                    Pair(token.cashOne, "R$ 1,00"),
-                    Pair(token.cashTwo, "R$ 2,00"),
-                    Pair(token.cashFour, "R$ 4,00"),
-                    Pair(token.cashFive, "R$ 5,00"),
-                    Pair(token.cashSix, "R$ 6,00"),
-                    Pair(token.cashEight, "R$ 8,00"),
-                    Pair(token.cashTen, "R$ 10,00")
-                )
+        binding.btPix.setOnClickListener {
+            // Update payment method in database report table
+            val reportToBeUpdated = Report(paymentMethodPix = 1)
+            viewModel.updateReportTokens(reportToBeUpdated)
 
-                auxTokensList.forEach { tokensPair ->
-                    if (tokensPair.first > 0) {
-                        for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second)
-                        }
-                    }
-                }
-            }
+            Utils.tokenPayment(viewModel, selectedTokensList)
+
+            clearFields()
+        }
+
+        binding.btDebit.setOnClickListener {
+            // Update payment method in database report table
+            val reportToBeUpdated = Report(paymentMethodDebit = 1)
+            viewModel.updateReportTokens(reportToBeUpdated)
+
+            Utils.tokenPayment(viewModel, selectedTokensList)
+
+            clearFields()
+        }
+
+        binding.btCredit.setOnClickListener {
+            // Update payment method in database report table
+            val reportToBeUpdated = Report(paymentMethodCredit = 1)
+            viewModel.updateReportTokens(reportToBeUpdated)
+
+            Utils.tokenPayment(viewModel, selectedTokensList)
+
+            clearFields()
         }
 
         return binding.root
@@ -123,44 +130,47 @@ class TokensFragment : Fragment() {
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun printToken(tokenValue: String) {
-        val calendar = Calendar.getInstance()
-        val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
-        val date = format.format(calendar.time)
+    @SuppressLint("SetTextI18n")
+    private fun showCashChangeDialog() {
+        val inflater = LayoutInflater.from(requireContext())
+        val dialogLayout: View =
+            inflater.inflate(R.layout.cash_change_dialog_layout, requireActivity().findViewById(R.id.token_layout) as ViewGroup?)
+        val db = AlertDialog.Builder(requireContext())
 
-        val imgFile = File(Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg")
-        val myBitmap = BitmapFactory.decodeFile(imgFile.toString())
+        val amountReceivedEditText = dialogLayout.findViewById<View>(R.id.edt_amount_received) as EditText
+        val calcCashChangeButton = dialogLayout.findViewById<View>(R.id.bt_calc_cash_change) as TextView
+        val totalCashChangeTextView = dialogLayout.findViewById<View>(R.id.tv_total_cash_change) as TextView
 
-        val tokenLayout = layoutInflater.inflate(R.layout.token_layout, null)
+        amountReceivedEditText.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                Utils.formatCashTextMask(s, amountReceivedEditText, this)
+            }
 
-        tokenLayout.findViewById<TextView>(R.id.tv_token_value).text = tokenValue
-        tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
 
-        //tokenImage = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
+            override fun afterTextChanged(s: Editable) { }
+        })
 
-        val bitmap = Utils.createBitmapFromConstraintLayout(tokenLayout)
+        calcCashChangeButton.setOnClickListener {
+            val amountReceived = amountReceivedEditText.text.toString()
+                .replace("R$", "")
+                .replace(",", ".")
+                .trim()
+                .toFloat()
+            val cashChange = amountReceived - tokenSum
 
-        printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-        printHelper.printData("FESTA DE SÃO JUDAS TADEU 2023", 35, 0, false, 1, 80, 0)
-        printHelper.printData("VALE R$ 2,00", 80, 0, false, 1, 80, 0)
-        printHelper.printBitmap(bitmap, 2, 80)
-        printHelper.printData(date, 30, 0, false, 0, 80, 0)
-        printHelper.printData("AGRADECEMOS SUA PRESENÇA!", 40, 0, false, 0, 80, 0)
-        printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-        printSpace(2)
-        printHelper.printStart()
-        printHelper.cutPaper(1)
+            totalCashChangeTextView.text = "Troco: R$ " + String.format("%.2f", cashChange)
+        }
+
+        db.setView(dialogLayout)
+        db.setTitle("Digite o valor recebido")
+        db.setPositiveButton("OK") { _, _ -> clearFields() }
+        db.show()
     }
 
-    private fun printSpace(spaceSize: Int) {
-        if (spaceSize < 0) {
-            return
-        }
-        val strSpace = StringBuilder()
-        for (i in 0 until spaceSize) {
-            strSpace.append("\n")
-        }
-        printHelper.printData(strSpace.toString(), 32, 0, false, 1, 80, 0)
+    private fun clearFields() {
+        binding.tvTotaValue.text = "R$ 0,00"
+        tokenSum = 0f
+        selectedTokensList.clear()
     }
 }

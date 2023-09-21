@@ -13,6 +13,24 @@ import kotlinx.coroutines.launch
 
 class TokensViewModel(private val tokensDao: TokensDao, private val reportDao: ReportDao) : ViewModel() {
     fun getTokens(): Flow<List<Tokens>> = tokensDao.getAll()
+
+    fun updateReportTokens(report: Report) {
+        viewModelScope.launch(Dispatchers.IO) {
+            reportDao.updateReportTokens(
+                report.cashOneTokensSold,
+                report.cashTwoTokensSold,
+                report.cashFourTokensSold,
+                report.cashFiveTokensSold,
+                report.cashSixTokensSold,
+                report.cashEightTokensSold,
+                report.cashTenTokensSold,
+                report.paymentMethodCash,
+                report.paymentMethodPix,
+                report.paymentMethodDebit,
+                report.paymentMethodCredit
+            )
+        }
+    }
 }
 
 class TokensViewModelFactory(
