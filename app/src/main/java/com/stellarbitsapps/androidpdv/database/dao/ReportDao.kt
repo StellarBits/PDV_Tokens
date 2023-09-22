@@ -12,8 +12,8 @@ interface ReportDao {
     @Query("SELECT * FROM report ORDER BY date ASC")
     fun getAll(): Flow<List<Report>>
 
-    @Query("SELECT final_cash FROM Report ORDER BY id DESC LIMIT 1")
-    fun getLastFinalValue(): Float
+    @Query("SELECT (initial_cash > 0 and final_cash == 0) FROM Report ORDER BY id DESC LIMIT 1")
+    fun cashRegisterIsOpen(): Flow<Int>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertReport(vararg data: Report)

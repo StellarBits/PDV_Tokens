@@ -6,17 +6,26 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.text.TextWatcher
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewModelScope
+import androidx.print.PrintHelper
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
+import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
+import com.stellarbitsapps.androidpdv.ui.startscreen.StartScreenFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -24,8 +33,6 @@ import java.util.Calendar
 
 class Utils {
     companion object {
-        private lateinit var printHelper: AP80PrintHelper
-
         fun formatCashTextMask(s: CharSequence, editText: EditText, watcher: TextWatcher): String {
             var current = ""
 
@@ -47,7 +54,7 @@ class Utils {
             return current
         }
 
-        fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {
+        private fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {
             val constraintLayout = inflatedLayout.findViewById<View>(R.id.token_layout) as ConstraintLayout
 
             constraintLayout.isDrawingCacheEnabled = true
@@ -63,10 +70,15 @@ class Utils {
             return constraintLayout.drawingCache
         }
 
-        fun tokenPayment(viewModel: TokensViewModel, selectedTokensList: ArrayList<Tokens>) {
+        fun tokenPayment(
+            viewModel: TokensViewModel,
+            paymentMethodArray: Array<Int>,
+            selectedTokensList: ArrayList<Tokens>,
+            printHelper: AP80PrintHelper,
+            fragment: TokensFragment
+        ) {
 
             selectedTokensList.forEach { token ->
-                val fragment = TokensFragment.newInstance()
 
                 // Update report in database
                 val reportToBeUpdated = Report(
@@ -76,9 +88,14 @@ class Utils {
                     cashFiveTokensSold = token.cashFive,
                     cashSixTokensSold = token.cashSix,
                     cashEightTokensSold = token.cashEight,
-                    cashTenTokensSold = token.cashTen
+                    cashTenTokensSold = token.cashTen,
+                    paymentMethodCash = paymentMethodArray[0],
+                    paymentMethodPix = paymentMethodArray[1],
+                    paymentMethodDebit = paymentMethodArray[2],
+                    paymentMethodCredit = paymentMethodArray[3]
                 )
 
+                // TODO Fix fragment being recreated.
                 viewModel.updateReportTokens(reportToBeUpdated)
 
                 // Print tokens
@@ -95,7 +112,7 @@ class Utils {
                 auxTokensList.forEach { tokensPair ->
                     if (tokensPair.first > 0) {
                         for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second, fragment.requireContext(), fragment)
+                            printToken(tokensPair.second, printHelper, fragment)
                         }
                     }
                 }
@@ -103,10 +120,7 @@ class Utils {
         }
 
         @SuppressLint("SimpleDateFormat")
-        private fun printToken(tokenValue: String, context: Context, fragment: TokensFragment) {
-            printHelper = AP80PrintHelper.getInstance()
-            printHelper.initPrint(context)
-
+        private fun printToken(tokenValue: String, printHelper: AP80PrintHelper, fragment: TokensFragment) {
             val calendar = Calendar.getInstance()
             val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
             val date = format.format(calendar.time)
@@ -119,8 +133,6 @@ class Utils {
             tokenLayout.findViewById<TextView>(R.id.tv_token_value).text = tokenValue
             tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
 
-            //tokenImage = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
-
             val bitmap = createBitmapFromConstraintLayout(tokenLayout)
 
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
@@ -130,12 +142,12 @@ class Utils {
             printHelper.printData(date, 30, 0, false, 0, 80, 0)
             printHelper.printData("AGRADECEMOS SUA PRESENÇA!", 40, 0, false, 0, 80, 0)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printSpace(2)
+            printSpace(2, printHelper)
             printHelper.printStart()
             printHelper.cutPaper(1)
         }
 
-        private fun printSpace(spaceSize: Int) {
+        private fun printSpace(spaceSize: Int, printHelper: AP80PrintHelper) {
             if (spaceSize < 0) {
                 return
             }

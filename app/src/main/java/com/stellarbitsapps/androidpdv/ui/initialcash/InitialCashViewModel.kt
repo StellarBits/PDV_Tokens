@@ -16,8 +16,6 @@ class InitialCashViewModel(private val reportDao: ReportDao) : ViewModel() {
             reportDao.insertReport(report)
         }
     }
-
-    fun getLastFinalValue(): Float = reportDao.getLastFinalValue()
 }
 
 class InitialCashViewModelFactory(

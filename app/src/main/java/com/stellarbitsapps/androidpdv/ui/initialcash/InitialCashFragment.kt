@@ -1,5 +1,6 @@
 package com.stellarbitsapps.androidpdv.ui.initialcash
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,6 +22,7 @@ import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
+import com.stellarbitsapps.androidpdv.ui.startscreen.StartScreenFragmentDirections
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModelFactory
 import com.stellarbitsapps.androidpdv.util.Utils
@@ -51,19 +53,6 @@ class InitialCashFragment : Fragment() {
     ): View {
         setHasOptionsMenu(true)
 
-        val lastFinalValue = MutableLiveData(0f)
-
-        lifecycle.coroutineScope.launch(Dispatchers.IO) {
-            lastFinalValue.postValue(viewModel.getLastFinalValue())
-        }
-
-        lastFinalValue.observe(viewLifecycleOwner) {
-            if (it == 0f) {
-                val direction = InitialCashFragmentDirections.actionInitialCashFragmentToTokensFragment()
-                findNavController().navigate(direction)
-            }
-        }
-
         binding.button.setOnClickListener {
             val initialCash = binding.edtInitialCash.text.toString()
                 .replace("R$", "")
@@ -71,10 +60,10 @@ class InitialCashFragment : Fragment() {
                 .trim()
                 .toFloat()
 
+            // TODO Entrar com caixa zerado?
             viewModel.addReport(Report(initialCash = initialCash))
 
-            val direction = InitialCashFragmentDirections.actionInitialCashFragmentToTokensFragment()
-            findNavController().navigate(direction)
+            findNavController().navigate(R.id.tokensFragment)
         }
 
         binding.edtInitialCash.addTextChangedListener(object : TextWatcher {
@@ -100,14 +89,12 @@ class InitialCashFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.register_tokens -> {
-                val direction = InitialCashFragmentDirections.actionInitialCashFragmentToRegisterTokenFragment()
-                findNavController().navigate(direction)
+                findNavController().navigate(R.id.registerTokenFragment)
                 true
             }
 
             R.id.configure_tokens_layout -> {
-                val direction = InitialCashFragmentDirections.actionInitialCashFragmentToConfigureTokenLayoutFragment()
-                findNavController().navigate(direction)
+                findNavController().navigate(R.id.configureTokenLayoutFragment)
                 true
             }
 

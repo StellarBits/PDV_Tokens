@@ -31,12 +31,6 @@ class ConfigureTokenLayoutFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_configure_token_layout, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ConfigureTokenLayoutViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
-
     // TODO Get and verify permissions
 //    val path = Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg"
 //    val file = File(path)
