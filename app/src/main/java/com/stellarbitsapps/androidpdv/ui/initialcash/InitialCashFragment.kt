@@ -71,9 +71,9 @@ class InitialCashFragment : Fragment() {
                 Utils.formatCashTextMask(s, binding.edtInitialCash, this)
             }
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            override fun afterTextChanged(s: Editable) { }
+            override fun afterTextChanged(s: Editable) {}
         })
 
         return binding.root

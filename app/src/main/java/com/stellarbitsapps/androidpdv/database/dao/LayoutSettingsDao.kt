@@ -9,9 +9,22 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LayoutSettingsDao {
-    @Query("SELECT * FROM layoutsettings ORDER BY id ASC")
-    fun getAll(): Flow<List<LayoutSettings>>
+    @Query("SELECT * FROM LayoutSettings")
+    fun getAll(): Flow<LayoutSettings>
+
+    @Query("SELECT COUNT(*) FROM LayoutSettings")
+    fun getRowsCount(): Flow<Int>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(vararg layoutSettings: LayoutSettings)
+
+    @Query("UPDATE LayoutSettings SET " +
+            "header = :header," +
+            "footer = :footer," +
+            "image = :image")
+    suspend fun updateConfigs(
+        header: String,
+        footer: String,
+        image: String
+    )
 }

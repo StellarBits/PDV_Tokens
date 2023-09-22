@@ -13,11 +13,13 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewModelScope
 import androidx.print.PrintHelper
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
+import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
@@ -72,6 +74,7 @@ class Utils {
 
         fun tokenPayment(
             viewModel: TokensViewModel,
+            tokenSettings: LayoutSettings,
             paymentMethodArray: Array<Int>,
             selectedTokensList: ArrayList<Tokens>,
             printHelper: AP80PrintHelper,
@@ -112,7 +115,7 @@ class Utils {
                 auxTokensList.forEach { tokensPair ->
                     if (tokensPair.first > 0) {
                         for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second, printHelper, fragment)
+                            printToken(tokensPair.second, tokenSettings, printHelper, fragment)
                         }
                     }
                 }
@@ -120,13 +123,19 @@ class Utils {
         }
 
         @SuppressLint("SimpleDateFormat")
-        private fun printToken(tokenValue: String, printHelper: AP80PrintHelper, fragment: TokensFragment) {
+        private fun printToken(
+            tokenValue: String,
+            tokenSettings: LayoutSettings,
+            printHelper: AP80PrintHelper,
+            fragment: TokensFragment
+        ) {
             val calendar = Calendar.getInstance()
             val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
             val date = format.format(calendar.time)
 
-            val imgFile = File(Environment.getExternalStorageDirectory().absolutePath + "/PDV/img_small.jpg")
-            val myBitmap = BitmapFactory.decodeFile(imgFile.toString())
+            val myBitmap = BitmapFactory.decodeStream(
+                fragment.requireActivity().contentResolver.openInputStream(tokenSettings.image.toUri())
+            )
 
             val tokenLayout = fragment.layoutInflater.inflate(R.layout.token_layout, null)
 
@@ -136,11 +145,11 @@ class Utils {
             val bitmap = createBitmapFromConstraintLayout(tokenLayout)
 
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printHelper.printData("FESTA DE SÃO JUDAS TADEU 2023", 35, 0, false, 1, 80, 0)
+            printHelper.printData(tokenSettings.header, 35, 0, false, 1, 80, 0)
             printHelper.printData("VALE $tokenValue", 80, 0, false, 1, 80, 0)
             printHelper.printBitmap(bitmap, 2, 80)
             printHelper.printData(date, 30, 0, false, 0, 80, 0)
-            printHelper.printData("AGRADECEMOS SUA PRESENÇA!", 40, 0, false, 0, 80, 0)
+            printHelper.printData(tokenSettings.footer, 40, 0, false, 0, 80, 0)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
             printSpace(2, printHelper)
             printHelper.printStart()

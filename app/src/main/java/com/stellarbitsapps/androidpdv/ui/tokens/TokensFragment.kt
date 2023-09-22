@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
+import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
@@ -35,7 +36,8 @@ class TokensFragment : Fragment() {
     private val viewModel: TokensViewModel by activityViewModels {
         TokensViewModelFactory(
             (requireActivity().application as AndroidPdvApplication).database.tokensDao(),
-            (requireActivity().application as AndroidPdvApplication).database.reportDao()
+            (requireActivity().application as AndroidPdvApplication).database.reportDao(),
+            (requireActivity().application as AndroidPdvApplication).database.layoutSettingsDao()
         )
     }
 
@@ -49,6 +51,8 @@ class TokensFragment : Fragment() {
 
     private var selectedTokensList = arrayListOf<Tokens>()
 
+    private var tokenSettings = LayoutSettings()
+
     private lateinit var printHelper: AP80PrintHelper
 
     @SuppressLint("SetTextI18n")
@@ -61,6 +65,8 @@ class TokensFragment : Fragment() {
 
         initRecyclerView()
 
+        loadTokenLayoutSettings()
+
         binding.btClean.setOnClickListener {
             clearFields()
         }
@@ -72,7 +78,7 @@ class TokensFragment : Fragment() {
         binding.btCash.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val paymentMethodArray = arrayOf(1, 0, 0, 0)
-            Utils.tokenPayment(viewModel, paymentMethodArray, selectedTokensList, printHelper, this)
+            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
 
             showCashChangeDialog()
         }
@@ -80,7 +86,7 @@ class TokensFragment : Fragment() {
         binding.btPix.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val paymentMethodArray = arrayOf(0, 1, 0, 0)
-            Utils.tokenPayment(viewModel, paymentMethodArray, selectedTokensList, printHelper, this)
+            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
 
             clearFields()
         }
@@ -88,7 +94,7 @@ class TokensFragment : Fragment() {
         binding.btDebit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val paymentMethodArray = arrayOf(0, 0, 1, 0)
-            Utils.tokenPayment(viewModel, paymentMethodArray, selectedTokensList, printHelper, this)
+            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
 
             clearFields()
         }
@@ -96,7 +102,7 @@ class TokensFragment : Fragment() {
         binding.btCredit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val paymentMethodArray = arrayOf(0, 0, 0, 1)
-            Utils.tokenPayment(viewModel, paymentMethodArray, selectedTokensList, printHelper, this)
+            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
 
             clearFields()
         }
@@ -117,9 +123,21 @@ class TokensFragment : Fragment() {
         recyclerView = binding.rvCashButtons
 
         recyclerView.adapter = tokensAdapter
+
+        viewModel.getTokens()
+        viewModel.tokensList.observe(viewLifecycleOwner) {
+            tokensAdapter.submitList(it)
+        }
+    }
+
+    private fun loadTokenLayoutSettings() {
         lifecycle.coroutineScope.launch {
-            viewModel.getTokens().collect {
-                tokensAdapter.submitList(it)
+            viewModel.getRowsCount().collect {
+                if (it > 0) {
+                    viewModel.getConfigs().collect { configs ->
+                        tokenSettings = configs
+                    }
+                }
             }
         }
     }

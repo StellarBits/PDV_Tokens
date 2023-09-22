@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class LayoutSettings(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo(name = "header") val header: String,
-    @ColumnInfo(name = "footer") val footer: String,
-    @ColumnInfo(name = "image") val image: String
+    @ColumnInfo(name = "header") val header: String = "",
+    @ColumnInfo(name = "footer") val footer: String = "",
+    @ColumnInfo(name = "image") val image: String = ""
 )
