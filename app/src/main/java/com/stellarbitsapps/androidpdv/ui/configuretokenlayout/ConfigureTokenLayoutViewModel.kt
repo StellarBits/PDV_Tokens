@@ -1,5 +1,6 @@
 package com.stellarbitsapps.androidpdv.ui.configuretokenlayout
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,15 +11,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class ConfigureTokenLayoutViewModel(private val layoutSettingsDao: LayoutSettingsDao) : ViewModel() {
-    fun createConfig() {
-        viewModelScope.launch(Dispatchers.IO) {
-            layoutSettingsDao.insertAll(LayoutSettings())
+
+    val layoutSettings = MutableLiveData<LayoutSettings>()
+
+    fun getConfigs() {
+        viewModelScope.launch {
+            getRowsCount().collect {
+                if (it == 0) {
+                    layoutSettingsDao.insertAll(LayoutSettings())
+                } else {
+                    layoutSettingsDao.getAll().collect { configs ->
+                        layoutSettings.postValue(configs)
+                    }
+                }
+            }
         }
     }
 
-    fun getConfigs(): Flow<LayoutSettings> = layoutSettingsDao.getAll()
-
-    fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
+    private fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
 
     fun updateConfigs(layoutSettings: LayoutSettings) {
         viewModelScope.launch(Dispatchers.IO) {

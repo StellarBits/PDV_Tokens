@@ -60,7 +60,6 @@ class InitialCashFragment : Fragment() {
                 .trim()
                 .toFloat()
 
-            // TODO Entrar com caixa zerado?
             viewModel.addReport(Report(initialCash = initialCash))
 
             findNavController().navigate(R.id.tokensFragment)

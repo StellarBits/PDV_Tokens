@@ -53,25 +53,7 @@ class ConfigureTokenLayoutFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val tokenSettings = MutableLiveData<LayoutSettings>()
-
-        lifecycle.coroutineScope.launch {
-            viewModel.getRowsCount().collect {
-                if (it == 0) {
-                    viewModel.createConfig()
-                } else {
-                    viewModel.getConfigs().collect { configs ->
-                        tokenSettings.postValue(configs)
-                    }
-                }
-            }
-        }
-
-        tokenSettings.observe(viewLifecycleOwner) {
-            binding.edtHeader.setText(it.header)
-            binding.edtFooter.setText(it.footer)
-            loadImage(it.image.toUri())
-        }
+        loadTokenLayoutSettings()
 
         binding.btClose.setOnClickListener {
             Navigation.findNavController(requireActivity(), this.id).popBackStack()
@@ -107,6 +89,15 @@ class ConfigureTokenLayoutFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun loadTokenLayoutSettings() {
+        viewModel.getConfigs()
+        viewModel.layoutSettings.observe(viewLifecycleOwner) {
+            binding.edtHeader.setText(it.header)
+            binding.edtFooter.setText(it.footer)
+            loadImage(it.image.toUri())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

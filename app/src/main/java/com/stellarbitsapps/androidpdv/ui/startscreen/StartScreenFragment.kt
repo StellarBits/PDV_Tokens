@@ -34,14 +34,12 @@ class StartScreenFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        lifecycle.coroutineScope.launch {
-            viewModel.cashRegisterIsOpen().collect {
-                // 1 is open and 0 is closed
-                if (it == 0) {
-                    findNavController().navigate(R.id.initialCashFragment)
-                } else {
-                    findNavController().navigate(R.id.tokensFragment)
-                }
+        viewModel.cashRegisterIsOpen()
+        viewModel.cashRegisterIsOpen.observe(viewLifecycleOwner) {
+            if (it) {
+                findNavController().navigate(R.id.tokensFragment)
+            } else {
+                findNavController().navigate(R.id.initialCashFragment)
             }
         }
 

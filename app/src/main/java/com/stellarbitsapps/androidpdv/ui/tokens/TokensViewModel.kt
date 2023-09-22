@@ -3,6 +3,7 @@ package com.stellarbitsapps.androidpdv.ui.tokens
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewModelScope
 import com.stellarbitsapps.androidpdv.database.dao.LayoutSettingsDao
 import com.stellarbitsapps.androidpdv.database.dao.ReportDao
@@ -22,6 +23,8 @@ class TokensViewModel(
 ) : ViewModel() {
 
     val tokensList = MutableLiveData<List<Tokens>>()
+
+    val layoutSettings = MutableLiveData<LayoutSettings>()
 
     fun getTokens() {
         viewModelScope.launch {
@@ -49,7 +52,17 @@ class TokensViewModel(
         }
     }
 
-    fun getConfigs(): Flow<LayoutSettings> = layoutSettingsDao.getAll()
+    fun getConfigs() {
+        viewModelScope.launch {
+            getRowsCount().collect {
+                if (it > 0) {
+                    layoutSettingsDao.getAll().collect { configs ->
+                        layoutSettings.postValue(configs)
+                    }
+                }
+            }
+        }
+    }
 
     fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
 }

@@ -131,14 +131,9 @@ class TokensFragment : Fragment() {
     }
 
     private fun loadTokenLayoutSettings() {
-        lifecycle.coroutineScope.launch {
-            viewModel.getRowsCount().collect {
-                if (it > 0) {
-                    viewModel.getConfigs().collect { configs ->
-                        tokenSettings = configs
-                    }
-                }
-            }
+        viewModel.getConfigs()
+        viewModel.layoutSettings.observe(viewLifecycleOwner) {
+            tokenSettings = it
         }
     }
 
