@@ -12,11 +12,13 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.fragment.findNavController
+import com.android.sublcdlibrary.SubLcdHelper
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
+import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
 import java.text.NumberFormat
@@ -130,6 +132,40 @@ class Utils {
                         }
                     }
                 }
+            }
+        }
+
+        fun showInSubDisplay(subLcdHelper: SubLcdHelper, fragment: InitialCashFragment, layoutSettings: LayoutSettings) {
+
+            if (layoutSettings.header.isNotEmpty() && layoutSettings.image.isNotEmpty()) {
+
+                val myBitmap = BitmapFactory.decodeStream(
+                    fragment.requireActivity().contentResolver.openInputStream(layoutSettings.image.toUri())
+                )
+
+                val subDisplayLayout =
+                    fragment.layoutInflater.inflate(R.layout.sub_display_layout, null)
+
+                subDisplayLayout.findViewById<TextView>(R.id.tv_sub_display_header).text =
+                    layoutSettings.header
+                subDisplayLayout.findViewById<ImageView>(R.id.img_sub_display_image)
+                    .setImageBitmap(myBitmap)
+
+                val constraintLayout =
+                    subDisplayLayout.findViewById<View>(R.id.sub_display_layout) as ConstraintLayout
+
+                constraintLayout.isDrawingCacheEnabled = true
+
+                constraintLayout.measure(
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                )
+
+                constraintLayout.layout(0, 0, constraintLayout.measuredWidth, constraintLayout.measuredHeight)
+                constraintLayout.buildDrawingCache(true)
+
+                val bmp = subLcdHelper.doRotateBitmap(constraintLayout.drawingCache, 90f)
+                subLcdHelper.sendBitmap(bmp)
             }
         }
 

@@ -14,14 +14,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.android.sublcdlibrary.SubLcdHelper
+import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
+import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
 import com.stellarbitsapps.androidpdv.util.Utils
 
 
-class InitialCashFragment : Fragment() {
+class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
 
     companion object {
         fun newInstance() = InitialCashFragment()
@@ -29,7 +32,8 @@ class InitialCashFragment : Fragment() {
 
     private val viewModel: InitialCashViewModel by activityViewModels {
         InitialCashViewModelFactory(
-            (requireActivity().application as AndroidPdvApplication).database.reportDao()
+            (requireActivity().application as AndroidPdvApplication).database.reportDao(),
+            (requireActivity().application as AndroidPdvApplication).database.layoutSettingsDao(),
         )
     }
 
@@ -37,11 +41,21 @@ class InitialCashFragment : Fragment() {
         FragmentInitialCashBinding.inflate(layoutInflater)
     }
 
+    private lateinit var subLcdHelper: SubLcdHelper
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         setHasOptionsMenu(true)
+
+        loadTokenLayoutSettings()
+
+        subLcdHelper = SubLcdHelper.getInstance()
+        subLcdHelper.init(requireContext())
+        subLcdHelper.SetCalBack { s: String?, cmd: Int ->
+            datatrigger(s, cmd)
+        }
 
         binding.button.setOnClickListener {
             val initialCash = binding.edtInitialCash.text.toString()
@@ -96,6 +110,17 @@ class InitialCashFragment : Fragment() {
             }
 
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun datatrigger(p0: String?, p1: Int) {
+        TODO("Not yet implemented")
+    }
+
+    private fun loadTokenLayoutSettings() {
+        viewModel.getConfigs()
+        viewModel.layoutSettings.observe(viewLifecycleOwner) {
+            Utils.showInSubDisplay(subLcdHelper, this, it)
         }
     }
 }
