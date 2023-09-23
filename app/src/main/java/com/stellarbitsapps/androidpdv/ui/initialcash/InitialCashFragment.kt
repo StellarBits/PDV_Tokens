@@ -1,7 +1,7 @@
 package com.stellarbitsapps.androidpdv.ui.initialcash
 
-import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -11,24 +11,14 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
-import com.stellarbitsapps.androidpdv.ui.startscreen.StartScreenFragmentDirections
-import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
-import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModelFactory
 import com.stellarbitsapps.androidpdv.util.Utils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.text.NumberFormat
 
 
 class InitialCashFragment : Fragment() {
@@ -63,6 +53,14 @@ class InitialCashFragment : Fragment() {
             viewModel.addReport(Report(initialCash = initialCash))
 
             findNavController().navigate(R.id.tokensFragment)
+        }
+
+        binding.edtInitialCash.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                Handler().postDelayed({
+                    binding.edtInitialCash.setSelection(binding.edtInitialCash.length())
+                }, 1)
+            }
         }
 
         binding.edtInitialCash.addTextChangedListener(object : TextWatcher {

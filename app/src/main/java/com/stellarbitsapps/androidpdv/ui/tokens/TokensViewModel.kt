@@ -44,11 +44,17 @@ class TokensViewModel(
                 report.cashSixTokensSold,
                 report.cashEightTokensSold,
                 report.cashTenTokensSold,
-                report.paymentMethodCash,
-                report.paymentMethodPix,
-                report.paymentMethodDebit,
-                report.paymentMethodCredit
+                report.paymentCash,
+                report.paymentPix,
+                report.paymentDebit,
+                report.paymentCredit
             )
+        }
+    }
+
+    fun deleteReport() {
+        viewModelScope.launch {
+            reportDao.deleteReport()
         }
     }
 
@@ -64,7 +70,7 @@ class TokensViewModel(
         }
     }
 
-    fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
+    private fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
 }
 
 class TokensViewModelFactory(

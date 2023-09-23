@@ -7,12 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.databinding.FragmentStartScreenBinding
-import kotlinx.coroutines.launch
 
 class StartScreenFragment : Fragment() {
 

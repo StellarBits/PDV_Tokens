@@ -23,7 +23,7 @@
             android:background="@drawable/edittext_round_background"
             android:ems="10"
             android:gravity="center"
-            android:text="R$ 0,00"
+            android:hint="R$ 0,00"
             android:inputType="numberDecimal"
             android:textSize="24sp"
             app:layout_constraintBottom_toTopOf="@+id/button"

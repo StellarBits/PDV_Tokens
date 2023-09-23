@@ -19,6 +19,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
+import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.databinding.FragmentConfigureTokenLayoutBinding
@@ -56,7 +58,7 @@ class ConfigureTokenLayoutFragment : Fragment() {
         loadTokenLayoutSettings()
 
         binding.btClose.setOnClickListener {
-            Navigation.findNavController(requireActivity(), this.id).popBackStack()
+            findNavController().navigate(R.id.initialCashFragment)
         }
 
         binding.btSave.setOnClickListener {

@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReportDao {
-    @Query("SELECT * FROM report ORDER BY date ASC")
-    fun getAll(): Flow<List<Report>>
+    @Query("SELECT * FROM report WHERE (initial_cash > 0 and final_cash == 0)")
+    fun getAll(): Flow<Report>
 
-    @Query("SELECT (initial_cash > 0 and final_cash == 0) FROM Report ORDER BY id DESC LIMIT 1")
+    @Query("SELECT (initial_cash > 0 and final_cash == 0) FROM report ORDER BY id DESC LIMIT 1")
     fun cashRegisterIsOpen(): Flow<Int>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -26,11 +26,11 @@ interface ReportDao {
             "cash_six_tokens_sold = cash_six_tokens_sold + :cashSix," +
             "cash_eight_tokens_sold = cash_eight_tokens_sold + :cashEight," +
             "cash_ten_tokens_sold = cash_ten_tokens_sold + :cashTen," +
-            "payment_method_cash = payment_method_cash + :paymentMethodCash," +
-            "payment_method_pix = payment_method_pix + :paymentMethodPix," +
-            "payment_method_debit = payment_method_debit + :paymentMethodDebit," +
-            "payment_method_credit = payment_method_credit + :paymentMethodCredit" +
-            " WHERE date(date / 1000, 'unixepoch', 'localtime') == date('now', 'localtime')")
+            "payment_method_cash = payment_method_cash + :paymentCash," +
+            "payment_method_pix = payment_method_pix + :paymentPix," +
+            "payment_method_debit = payment_method_debit + :paymentDebit," +
+            "payment_method_credit = payment_method_credit + :paymentCredit" +
+            " WHERE (initial_cash > 0 and final_cash == 0)")
     suspend fun updateReportTokens(
         cashOne: Int,
         cashTwo: Int,
@@ -39,9 +39,15 @@ interface ReportDao {
         cashSix: Int,
         cashEight: Int,
         cashTen: Int,
-        paymentMethodCash: Int,
-        paymentMethodPix: Int,
-        paymentMethodDebit: Int,
-        paymentMethodCredit: Int,
+        paymentCash: Float,
+        paymentPix: Float,
+        paymentDebit: Float,
+        paymentCredit: Float,
     )
+
+    @Query("UPDATE report SET final_cash = :finalCash WHERE (initial_cash > 0 and final_cash == 0)")
+    suspend fun updateReportFinalValue(finalCash: Float)
+
+    @Query("DELETE FROM report WHERE (initial_cash > 0 and final_cash == 0)")
+    suspend fun deleteReport()
 }

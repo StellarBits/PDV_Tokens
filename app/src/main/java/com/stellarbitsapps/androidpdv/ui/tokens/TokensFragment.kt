@@ -3,6 +3,7 @@ package com.stellarbitsapps.androidpdv.ui.tokens
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -77,32 +78,32 @@ class TokensFragment : Fragment() {
 
         binding.btCash.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
-            val paymentMethodArray = arrayOf(1, 0, 0, 0)
-            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
+            val tokenValues = arrayOf(tokenSum, 0f, 0f, 0f)
+            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
 
             showCashChangeDialog()
         }
 
         binding.btPix.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
-            val paymentMethodArray = arrayOf(0, 1, 0, 0)
-            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
+            val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
+            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
 
             clearFields()
         }
 
         binding.btDebit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
-            val paymentMethodArray = arrayOf(0, 0, 1, 0)
-            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
+            val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
+            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
 
             clearFields()
         }
 
         binding.btCredit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
-            val paymentMethodArray = arrayOf(0, 0, 0, 1)
-            Utils.tokenPayment(viewModel, tokenSettings, paymentMethodArray, selectedTokensList, printHelper, this)
+            val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
+            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
 
             clearFields()
         }
@@ -153,6 +154,14 @@ class TokensFragment : Fragment() {
             dialogLayout.findViewById<View>(R.id.bt_calc_cash_change) as TextView
         val totalCashChangeTextView =
             dialogLayout.findViewById<View>(R.id.tv_total_cash_change) as TextView
+
+        amountReceivedEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                Handler().postDelayed({
+                    amountReceivedEditText.setSelection(amountReceivedEditText.length())
+                }, 1)
+            }
+        }
 
         amountReceivedEditText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {

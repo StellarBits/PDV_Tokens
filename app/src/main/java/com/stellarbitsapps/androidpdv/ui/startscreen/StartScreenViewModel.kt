@@ -4,16 +4,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
-import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.dao.ReportDao
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class StartScreenViewModel(private val reportDao: ReportDao) : ViewModel() {
-    val cashRegisterIsOpen = MutableLiveData(false)
-
-    //fun cashRegisterIsOpen(): Flow<Int> = reportDao.cashRegisterIsOpen()
+    val cashRegisterIsOpen = MutableLiveData<Boolean>()
 
     fun cashRegisterIsOpen() {
         viewModelScope.launch {

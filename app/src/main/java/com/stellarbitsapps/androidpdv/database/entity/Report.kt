@@ -19,8 +19,8 @@ data class Report(
     @ColumnInfo(name = "cash_six_tokens_sold") val cashSixTokensSold: Int = 0,
     @ColumnInfo(name = "cash_eight_tokens_sold") val cashEightTokensSold: Int = 0,
     @ColumnInfo(name = "cash_ten_tokens_sold") val cashTenTokensSold: Int = 0,
-    @ColumnInfo(name = "payment_method_cash") val paymentMethodCash: Int = 0,
-    @ColumnInfo(name = "payment_method_pix") val paymentMethodPix: Int = 0,
-    @ColumnInfo(name = "payment_method_debit") val paymentMethodDebit: Int = 0,
-    @ColumnInfo(name = "payment_method_credit") val paymentMethodCredit: Int = 0,
+    @ColumnInfo(name = "payment_method_cash") val paymentCash: Float = 0f,
+    @ColumnInfo(name = "payment_method_pix") val paymentPix: Float = 0f,
+    @ColumnInfo(name = "payment_method_debit") val paymentDebit: Float = 0f,
+    @ColumnInfo(name = "payment_method_credit") val paymentCredit: Float = 0f,
 )

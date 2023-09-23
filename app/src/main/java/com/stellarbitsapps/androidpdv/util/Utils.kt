@@ -1,34 +1,24 @@
 package com.stellarbitsapps.androidpdv.util
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Environment
 import android.text.TextWatcher
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewModelScope
-import androidx.print.PrintHelper
+import androidx.navigation.fragment.findNavController
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
-import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
-import com.stellarbitsapps.androidpdv.ui.startscreen.StartScreenFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -75,11 +65,29 @@ class Utils {
         fun tokenPayment(
             viewModel: TokensViewModel,
             tokenSettings: LayoutSettings,
-            paymentMethodArray: Array<Int>,
+            tokenValues: Array<Float>,
             selectedTokensList: ArrayList<Tokens>,
             printHelper: AP80PrintHelper,
             fragment: TokensFragment
         ) {
+
+            if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
+                val builder = AlertDialog.Builder(fragment.requireContext())
+
+                builder.setTitle("Atenção!")
+                builder.setMessage("O layout das fichas não foi configurado corretamente." +
+                        "\nA operação será cancelada e o caixa reiniciado!")
+
+                builder.setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                    viewModel.deleteReport()
+                    fragment.findNavController().navigate(R.id.configureTokenLayoutFragment)
+                }
+
+                val alertDialog = builder.create()
+                alertDialog.show()
+                return
+            }
 
             selectedTokensList.forEach { token ->
 
@@ -92,10 +100,10 @@ class Utils {
                     cashSixTokensSold = token.cashSix,
                     cashEightTokensSold = token.cashEight,
                     cashTenTokensSold = token.cashTen,
-                    paymentMethodCash = paymentMethodArray[0],
-                    paymentMethodPix = paymentMethodArray[1],
-                    paymentMethodDebit = paymentMethodArray[2],
-                    paymentMethodCredit = paymentMethodArray[3]
+                    paymentCash = tokenValues[0],
+                    paymentPix = tokenValues[1],
+                    paymentDebit = tokenValues[2],
+                    paymentCredit = tokenValues[3]
                 )
 
                 // TODO Fix fragment being recreated.

@@ -2,6 +2,7 @@ package com.stellarbitsapps.androidpdv.ui.registertokens
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -47,18 +48,22 @@ class RegisterTokenFragment : Fragment() {
             binding.edtCashTen
         )
 
+        binding.edtCashValue.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                Handler().postDelayed({
+                    binding.edtCashValue.setSelection(binding.edtCashValue.length())
+                }, 1)
+            }
+        }
+
         binding.edtCashValue.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 Utils.formatCashTextMask(s, binding.edtCashValue, this)
             }
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // Do nothing
-            }
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            override fun afterTextChanged(s: Editable) {
-                // Do nothing
-            }
+            override fun afterTextChanged(s: Editable) {}
         })
 
         cashEditTextList.forEach { cashEditText ->
