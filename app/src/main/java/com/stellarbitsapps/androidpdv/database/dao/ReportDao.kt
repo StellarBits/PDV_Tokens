@@ -26,10 +26,10 @@ interface ReportDao {
             "cash_six_tokens_sold = cash_six_tokens_sold + :cashSix," +
             "cash_eight_tokens_sold = cash_eight_tokens_sold + :cashEight," +
             "cash_ten_tokens_sold = cash_ten_tokens_sold + :cashTen," +
-            "payment_method_cash = payment_method_cash + :paymentCash," +
-            "payment_method_pix = payment_method_pix + :paymentPix," +
-            "payment_method_debit = payment_method_debit + :paymentDebit," +
-            "payment_method_credit = payment_method_credit + :paymentCredit" +
+            "payment_cash = payment_cash + :paymentCash," +
+            "payment_pix = payment_pix + :paymentPix," +
+            "payment_debit = payment_debit + :paymentDebit," +
+            "payment_credit = payment_credit + :paymentCredit" +
             " WHERE (initial_cash > 0 and final_cash == 0)")
     suspend fun updateReportTokens(
         cashOne: Int,

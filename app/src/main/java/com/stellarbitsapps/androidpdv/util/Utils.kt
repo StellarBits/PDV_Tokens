@@ -70,6 +70,7 @@ class Utils {
             printHelper: AP80PrintHelper,
             fragment: TokensFragment
         ) {
+            var tokenPaymentValues = tokenValues
 
             if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
                 val builder = AlertDialog.Builder(fragment.requireContext())
@@ -100,11 +101,13 @@ class Utils {
                     cashSixTokensSold = token.cashSix,
                     cashEightTokensSold = token.cashEight,
                     cashTenTokensSold = token.cashTen,
-                    paymentCash = tokenValues[0],
-                    paymentPix = tokenValues[1],
-                    paymentDebit = tokenValues[2],
-                    paymentCredit = tokenValues[3]
+                    paymentCash = tokenPaymentValues[0],
+                    paymentPix = tokenPaymentValues[1],
+                    paymentDebit = tokenPaymentValues[2],
+                    paymentCredit = tokenPaymentValues[3]
                 )
+
+                tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
 
                 // TODO Fix fragment being recreated.
                 viewModel.updateReportTokens(reportToBeUpdated)
