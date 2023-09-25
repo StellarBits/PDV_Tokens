@@ -1,5 +1,6 @@
 package com.stellarbitsapps.androidpdv.ui.initialcash
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -109,6 +110,11 @@ class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
                 true
             }
 
+            R.id.about_us -> {
+                showAboutDialog()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -122,5 +128,19 @@ class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
         viewModel.layoutSettings.observe(viewLifecycleOwner) {
             Utils.showInSubDisplay(subLcdHelper, this, it)
         }
+    }
+
+    private fun showAboutDialog() {
+        val inflater = LayoutInflater.from(requireContext())
+        val dialogLayout: View =
+            inflater.inflate(
+                R.layout.about_us_dialog_layout,
+                requireActivity().findViewById(R.id.token_layout) as ViewGroup?
+            )
+
+        val alertDialogBuilder = AlertDialog.Builder(requireContext())
+
+        alertDialogBuilder.setView(dialogLayout)
+        alertDialogBuilder.show()
     }
 }

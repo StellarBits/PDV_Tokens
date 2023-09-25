@@ -13,4 +13,13 @@
         android:title="@string/config_tokens_layout_menu_text"
         android:orderInCategory="101"
         app:showAsAction="never" />
+
+    <group android:id="@+id/about">
+        <item
+            android:id="@+id/about_us"
+            android:orderInCategory="102"
+            android:title="@string/about_us_layout_menu_text"
+            app:showAsAction="never" />
+
+    </group>
 </menu>
