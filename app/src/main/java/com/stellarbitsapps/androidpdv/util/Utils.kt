@@ -2,9 +2,11 @@ package com.stellarbitsapps.androidpdv.util
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -72,16 +74,27 @@ class Utils {
             printHelper: AP80PrintHelper,
             fragment: TokensFragment
         ) {
-            var tokenPaymentValues = tokenValues
-
             if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
                 val builder = AlertDialog.Builder(fragment.requireContext())
 
                 builder.setTitle("Atenção!")
                 builder.setMessage("O layout das fichas não foi configurado corretamente." +
-                        "\nA operação será cancelada e o caixa reiniciado!")
+                        "\nDeseja imprimir mesmo assim?\n\nEm caso negativo, a operação será cancelada e o caixa reiniciado.")
+                builder.setIcon(android.R.drawable.ic_dialog_alert)
 
-                builder.setPositiveButton("OK") { dialog, _ ->
+                builder.setPositiveButton("Sim") { dialog, _ ->
+                    dialog.dismiss()
+                    prepareAndPrintToken(
+                        viewModel,
+                        tokenSettings,
+                        tokenValues,
+                        selectedTokensList,
+                        printHelper,
+                        fragment
+                    )
+                }
+
+                builder.setNegativeButton("Não") { dialog, _ ->
                     dialog.dismiss()
                     viewModel.deleteReport()
                     fragment.findNavController().navigate(R.id.configureTokenLayoutFragment)
@@ -89,8 +102,27 @@ class Utils {
 
                 val alertDialog = builder.create()
                 alertDialog.show()
-                return
+            } else {
+                prepareAndPrintToken(
+                    viewModel,
+                    tokenSettings,
+                    tokenValues,
+                    selectedTokensList,
+                    printHelper,
+                    fragment
+                )
             }
+        }
+
+        private fun prepareAndPrintToken(
+            viewModel: TokensViewModel,
+            tokenSettings: LayoutSettings,
+            tokenValues: Array<Float>,
+            selectedTokensList: ArrayList<Tokens>,
+            printHelper: AP80PrintHelper,
+            fragment: TokensFragment
+        ) {
+            var tokenPaymentValues = tokenValues
 
             selectedTokensList.forEach { token ->
 
@@ -111,7 +143,6 @@ class Utils {
 
                 tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
 
-                // TODO Fix fragment being recreated.
                 viewModel.updateReportTokens(reportToBeUpdated)
 
                 // Print tokens
@@ -133,6 +164,8 @@ class Utils {
                     }
                 }
             }
+
+            fragment.clearFields()
         }
 
         fun showInSubDisplay(subLcdHelper: SubLcdHelper, fragment: InitialCashFragment, layoutSettings: LayoutSettings) {
@@ -180,14 +213,17 @@ class Utils {
             val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
             val date = format.format(calendar.time)
 
-            val myBitmap = BitmapFactory.decodeStream(
-                fragment.requireActivity().contentResolver.openInputStream(tokenSettings.image.toUri())
-            )
-
             val tokenLayout = fragment.layoutInflater.inflate(R.layout.token_layout, null)
 
             tokenLayout.findViewById<TextView>(R.id.tv_token_value).text = tokenValue
-            tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
+
+            if (tokenSettings.image.isNotEmpty()) {
+                val myBitmap = BitmapFactory.decodeStream(
+                    fragment.requireActivity().contentResolver.openInputStream(tokenSettings.image.toUri())
+                )
+
+                tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
+            }
 
             val bitmap = createBitmapFromConstraintLayout(tokenLayout)
 

@@ -2,16 +2,17 @@ package com.stellarbitsapps.androidpdv.ui.adapter
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.TokensItemBinding
+import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 
 class TokensAdapter(
-    private val tokensListener: TokensListener
+    private val tokensFragment: TokensFragment
 ) : ListAdapter<Tokens, TokensAdapter.TokensViewHolder>(DiffCallback) {
 
     companion object {
@@ -26,14 +27,27 @@ class TokensAdapter(
         }
     }
 
-    class TokensViewHolder(private val binding: TokensItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    class TokensViewHolder(private val binding: TokensItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(item: Tokens, buttonListener: TokensListener) {
+        fun bind(item: Tokens, tokensFragment: TokensFragment) {
             with(binding) {
+                binding.tvCounter.text = "0"
+                tvCounter.visibility = View.GONE
                 btToken.text = "R$ " + String.format("%.2f", item.value)
                 token = item
-                listener = buttonListener
                 executePendingBindings()
+            }
+
+            binding.btToken.setOnClickListener {
+                binding.tvCounter.visibility = View.VISIBLE
+
+                var count = binding.tvCounter.text.toString().toInt()
+                count += 1
+
+                binding.tvCounter.text = count.toString()
+
+                tokensFragment.tokenClicked(item)
             }
         }
     }
@@ -44,6 +58,6 @@ class TokensAdapter(
 
     override fun onBindViewHolder(holder: TokensViewHolder, position: Int) {
         val item = getItem(position) as Tokens
-        holder.bind(item, tokensListener)
+        holder.bind(item, tokensFragment)
     }
 }

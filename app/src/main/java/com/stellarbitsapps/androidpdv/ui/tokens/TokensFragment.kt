@@ -2,6 +2,7 @@ package com.stellarbitsapps.androidpdv.ui.tokens
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -11,10 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
@@ -24,9 +24,8 @@ import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
-import com.stellarbitsapps.androidpdv.ui.adapter.TokensListener
 import com.stellarbitsapps.androidpdv.util.Utils
-import kotlinx.coroutines.launch
+
 
 class TokensFragment : Fragment() {
 
@@ -45,6 +44,8 @@ class TokensFragment : Fragment() {
     private val binding: FragmentTokensBinding by lazy {
         FragmentTokensBinding.inflate(layoutInflater)
     }
+
+    private lateinit var tokensAdapter: TokensAdapter
 
     private lateinit var recyclerView: RecyclerView
 
@@ -73,7 +74,14 @@ class TokensFragment : Fragment() {
         }
 
         binding.btExit.setOnClickListener {
-            findNavController().navigate(R.id.finalCashFragment)
+            AlertDialog.Builder(requireContext())
+                .setTitle("Atenção!")
+                .setMessage("Você realmente deseja sair para fechar o caixa?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Sim") { _, _ ->
+                    findNavController().navigate(R.id.finalCashFragment)
+                }
+                .setNegativeButton("Não", null).show()
         }
 
         binding.btCash.setOnClickListener {
@@ -88,24 +96,18 @@ class TokensFragment : Fragment() {
             // Cash, Pix, Debit, Credit in this order
             val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
             Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
-
-            clearFields()
         }
 
         binding.btDebit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
             Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
-
-            clearFields()
         }
 
         binding.btCredit.setOnClickListener {
             // Cash, Pix, Debit, Credit in this order
             val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
             Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, printHelper, this)
-
-            clearFields()
         }
 
         return binding.root
@@ -113,13 +115,7 @@ class TokensFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun initRecyclerView() {
-        val tokensAdapter = TokensAdapter(TokensListener(
-            clickListener = { token ->
-                selectedTokensList.add(token)
-                tokenSum += token.value
-                binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
-            }
-        ))
+        tokensAdapter = TokensAdapter(this)
 
         recyclerView = binding.rvCashButtons
 
@@ -186,14 +182,24 @@ class TokensFragment : Fragment() {
 
         alertDialogBuilder.setView(dialogLayout)
         alertDialogBuilder.setTitle("Digite o valor recebido (Total: R$ ${String.format("%.2f", tokenSum)})")
-        alertDialogBuilder.setPositiveButton("OK") { _, _ -> clearFields() }
+        alertDialogBuilder.setPositiveButton("OK") { _, _ -> }
         alertDialogBuilder.setCancelable(false)
         alertDialogBuilder.show()
     }
 
-    private fun clearFields() {
+    @SuppressLint("NotifyDataSetChanged")
+    fun clearFields() {
         binding.tvTotaValue.text = "R$ 0,00"
         tokenSum = 0f
         selectedTokensList.clear()
+
+        tokensAdapter.notifyDataSetChanged()
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun tokenClicked(token: Tokens) {
+        selectedTokensList.add(token)
+        tokenSum += token.value
+        binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
     }
 }

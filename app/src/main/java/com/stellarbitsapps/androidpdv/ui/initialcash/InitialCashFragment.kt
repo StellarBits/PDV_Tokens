@@ -23,6 +23,7 @@ import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
 import com.stellarbitsapps.androidpdv.util.Utils
+import java.util.Calendar
 
 
 class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
@@ -59,13 +60,21 @@ class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
         }
 
         binding.button.setOnClickListener {
-            val initialCash = binding.edtInitialCash.text.toString()
-                .replace("R$", "")
-                .replace(",", ".")
-                .trim()
-                .toFloat()
 
-            viewModel.addReport(Report(initialCash = initialCash))
+            val initialCash = if (binding.edtInitialCash.text.toString().isEmpty()) 0f else {
+                binding.edtInitialCash.text.toString()
+                    .replace("R$", "")
+                    .replace(",", ".")
+                    .trim()
+                    .toFloat()
+            }
+
+            viewModel.addReport(
+                Report(
+                    initialCash = initialCash,
+                    initialDate = Calendar.getInstance().timeInMillis
+                )
+            )
 
             findNavController().navigate(R.id.tokensFragment)
         }

@@ -14,7 +14,7 @@
         android:layout_marginStart="150dp"
         android:text="Adicionar"
         android:textStyle="bold"
-        android:backgroundTint="@android:color/holo_blue_dark"
+        android:backgroundTint="@android:color/holo_green_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -23,10 +23,22 @@
         android:layout_width="150dp"
         android:layout_height="70dp"
         android:layout_marginBottom="50dp"
-        android:layout_marginEnd="150dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
         android:text="Limpar"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/bt_delete_all_tokens"
+        app:layout_constraintStart_toEndOf="@+id/bt_register_token" />
+
+    <Button
+        android:id="@+id/bt_delete_all_tokens"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="150dp"
         android:backgroundTint="@android:color/holo_red_light"
+        android:text="Deletar todas as fichas"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

@@ -14,4 +14,7 @@ interface TokensDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(vararg tokens: Tokens)
+
+    @Query("DELETE FROM tokens")
+    suspend fun deleteTokens()
 }

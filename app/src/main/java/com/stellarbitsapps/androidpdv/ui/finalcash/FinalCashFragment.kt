@@ -83,12 +83,13 @@ class FinalCashFragment : Fragment() {
         viewModel.report.observe(viewLifecycleOwner) { report ->
             val calendar = Calendar.getInstance()
             val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
-            val date = format.format(calendar.time)
+
+            val initialDate = format.format(report.initialDate)
+            val finalDate = format.format(calendar.time)
 
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printHelper.printData("Data: $date", 30, 0, false, 0, 80, 0)
-            printHelper.printData("Valor inicial: R$ ${String.format("%.2f", report.initialCash)}", 30, 0, false, 0, 80, 0)
-            printHelper.printData("Valor final: ${binding.edtFinalCash.text}", 30, 0, false, 0, 80, 0)
+            printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
+            printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text} - $finalDate", 30, 0, false, 0, 80, 0)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
             printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
             printHelper.printData("R$ 2,00  - Qtde x ${report.cashTwoTokensSold} - Total R$: ${String.format("%.2f", 2 * report.cashTwoTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
@@ -107,12 +108,14 @@ class FinalCashFragment : Fragment() {
             printHelper.printStart()
             printHelper.cutPaper(1)
 
-            val finalValue = binding.edtFinalCash.text.toString()
-                .replace("R$", "")
-                .replace(",", ".")
-                .trim()
-                .toFloat()
-            viewModel.closeCashRegister(finalValue)
+            val finalValue = if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
+                binding.edtFinalCash.text.toString()
+                    .replace("R$", "")
+                    .replace(",", ".")
+                    .trim()
+                    .toFloat()
+            }
+            viewModel.closeCashRegister(finalValue, calendar)
 
             findNavController().navigate(R.id.initialCashFragment)
         }

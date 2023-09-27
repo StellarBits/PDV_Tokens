@@ -8,6 +8,8 @@ import com.stellarbitsapps.androidpdv.database.dao.ReportDao
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
 class FinalCashViewModel(private val reportDao: ReportDao) : ViewModel() {
 
@@ -21,9 +23,9 @@ class FinalCashViewModel(private val reportDao: ReportDao) : ViewModel() {
         }
     }
 
-    fun closeCashRegister(finalValue: Float) {
+    fun closeCashRegister(finalValue: Float, calendar: Calendar) {
         viewModelScope.launch {
-            reportDao.updateReportFinalValue(finalValue)
+            reportDao.updateReportFinalValue(finalValue, calendar.timeInMillis)
         }
     }
 }

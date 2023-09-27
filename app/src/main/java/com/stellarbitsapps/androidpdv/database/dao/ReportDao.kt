@@ -7,12 +7,13 @@ import androidx.room.Query
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import kotlinx.coroutines.flow.Flow
 
+const val WHERE_CLAUSE = "((strftime('%Y-%m-%d', datetime(initial_date / 1000, 'unixepoch', 'localtime')) = strftime('%Y-%m-%d', 'now', 'localtime')) and final_date is NULL)"
 @Dao
 interface ReportDao {
-    @Query("SELECT * FROM report WHERE (initial_cash > 0 and final_cash == 0)")
+    @Query("SELECT * FROM report WHERE $WHERE_CLAUSE")
     fun getAll(): Flow<Report>
 
-    @Query("SELECT (initial_cash > 0 and final_cash == 0) FROM report ORDER BY id DESC LIMIT 1")
+    @Query("SELECT $WHERE_CLAUSE FROM report ORDER BY id DESC LIMIT 1")
     fun cashRegisterIsOpen(): Flow<Int>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -30,7 +31,7 @@ interface ReportDao {
             "payment_pix = payment_pix + :paymentPix," +
             "payment_debit = payment_debit + :paymentDebit," +
             "payment_credit = payment_credit + :paymentCredit" +
-            " WHERE (initial_cash > 0 and final_cash == 0)")
+            " WHERE $WHERE_CLAUSE")
     suspend fun updateReportTokens(
         cashOne: Int,
         cashTwo: Int,
@@ -45,9 +46,9 @@ interface ReportDao {
         paymentCredit: Float,
     )
 
-    @Query("UPDATE report SET final_cash = :finalCash WHERE (initial_cash > 0 and final_cash == 0)")
-    suspend fun updateReportFinalValue(finalCash: Float)
+    @Query("UPDATE report SET final_cash = :finalCash, final_date = :finalDate WHERE $WHERE_CLAUSE")
+    suspend fun updateReportFinalValue(finalCash: Float, finalDate: Long)
 
-    @Query("DELETE FROM report WHERE (initial_cash > 0 and final_cash == 0)")
+    @Query("DELETE FROM report WHERE $WHERE_CLAUSE")
     suspend fun deleteReport()
 }

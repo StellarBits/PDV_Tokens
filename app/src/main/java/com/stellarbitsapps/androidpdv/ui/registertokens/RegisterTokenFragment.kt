@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
@@ -85,6 +86,12 @@ class RegisterTokenFragment : Fragment() {
             clearAllFields(cashEditTextList)
         }
 
+        binding.btDeleteAllTokens.setOnClickListener {
+            viewModel.deleteTokens()
+            Toast.makeText(requireContext(), "Fichas deletadas com sucesso!", Toast.LENGTH_SHORT)
+                .show()
+        }
+
         binding.btRegisterToken.setOnClickListener {
             val value = binding.edtCashValue.text.toString()
                 .replace("R$", "")
@@ -104,6 +111,8 @@ class RegisterTokenFragment : Fragment() {
             )
 
             viewModel.setToken(token)
+            Toast.makeText(requireContext(), "Ficha cadastrada com sucesso!", Toast.LENGTH_SHORT)
+                .show()
 
             clearAllFields(cashEditTextList)
         }
