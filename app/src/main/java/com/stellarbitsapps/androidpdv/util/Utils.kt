@@ -2,19 +2,22 @@ package com.stellarbitsapps.androidpdv.util
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.android.sublcdlibrary.SubLcdHelper
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
@@ -22,6 +25,7 @@ import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
+import com.stellarbitsapps.androidpdv.ui.MainActivity.Companion.printHelper
 import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
@@ -30,8 +34,102 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.concurrent.Executors
 
+
 class Utils {
     companion object {
+        @SuppressLint("SetTextI18n")
+        fun showCashDialog(fragment: Fragment, viewModel: TokensViewModel, isSangria: Boolean, tokenSum: Float) {
+            val inflater = LayoutInflater.from(fragment.requireContext())
+            val dialogLayout: View =
+                inflater.inflate(
+                    R.layout.cash_change_dialog_layout,
+                    fragment.requireActivity().findViewById(R.id.token_layout) as ViewGroup?
+                )
+            val alertDialogBuilder = AlertDialog.Builder(fragment.requireContext())
+
+            val amountReceivedEditText =
+                dialogLayout.findViewById<EditText>(R.id.edt_amount_received)
+
+            val calcCashChangeButton =
+                dialogLayout.findViewById<Button>(R.id.bt_calc_cash_change)
+
+            val totalCashChangeTextView =
+                dialogLayout.findViewById<TextView>(R.id.tv_total_cash_change)
+
+            amountReceivedEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    Handler().postDelayed({
+                        amountReceivedEditText.setSelection(amountReceivedEditText.length())
+                    }, 1)
+                }
+            }
+
+            amountReceivedEditText.addTextChangedListener(object : TextWatcher {
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                    formatCashTextMask(s, amountReceivedEditText, this)
+                }
+
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+                override fun afterTextChanged(s: Editable) {}
+            })
+
+            calcCashChangeButton.setOnClickListener {
+                val valueEntered = if (amountReceivedEditText.text.toString().isEmpty()) 0f else {
+                    amountReceivedEditText.text.toString()
+                        .replace("R$", "")
+                        .replace(",", ".")
+                        .trim()
+                        .toFloat()
+                }
+
+                if (isSangria) {
+                    Executors.newSingleThreadExecutor().execute {
+                        val mainHandler = Handler(Looper.getMainLooper())
+
+                        // Sync print
+                        printSangria(valueEntered)
+
+                        mainHandler.post {
+                            // Update UI if necessary
+                        }
+                    }
+                    viewModel.insertSangria(valueEntered)
+                } else {
+                    val cashChange = valueEntered - tokenSum
+                    totalCashChangeTextView.text = "Troco: R$ " + String.format("%.2f", cashChange)
+                }
+            }
+
+            if (isSangria) {
+                totalCashChangeTextView.visibility = View.GONE
+            } else {
+                totalCashChangeTextView.visibility = View.VISIBLE
+            }
+
+            with(calcCashChangeButton) {
+                backgroundTintList = if (isSangria)
+                    resources.getColorStateList(android.R.color.holo_red_light, null)
+                else
+                    resources.getColorStateList(android.R.color.holo_green_dark, null)
+
+                text = if (isSangria) "Sangria" else "Calcular"
+            }
+
+            alertDialogBuilder.setView(dialogLayout)
+            alertDialogBuilder.setTitle(
+                if (isSangria)
+                    "Digite o valor da sangria:"
+                else
+                    "Digite o valor recebido (Total: R$ ${String.format("%.2f", tokenSum)})"
+            )
+            if (!isSangria) {
+                alertDialogBuilder.setPositiveButton("OK") { _, _ -> }
+            }
+            alertDialogBuilder.setCancelable(isSangria)
+            alertDialogBuilder.show()
+        }
+
         fun formatCashTextMask(s: CharSequence, editText: EditText, watcher: TextWatcher): String {
             var current = ""
 
@@ -53,28 +151,11 @@ class Utils {
             return current
         }
 
-        private fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {
-            val constraintLayout = inflatedLayout.findViewById<View>(R.id.token_layout) as ConstraintLayout
-
-            constraintLayout.isDrawingCacheEnabled = true
-
-            constraintLayout.measure(
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-            )
-
-            constraintLayout.layout(0, 0, constraintLayout.measuredWidth, constraintLayout.measuredHeight)
-            constraintLayout.buildDrawingCache(true)
-
-            return constraintLayout.drawingCache
-        }
-
         fun tokenPayment(
             viewModel: TokensViewModel,
             tokenSettings: LayoutSettings,
             tokenValues: Array<Float>,
             selectedTokensList: ArrayList<Tokens>,
-            printHelper: AP80PrintHelper,
             fragment: TokensFragment
         ) {
             if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
@@ -97,7 +178,6 @@ class Utils {
                             tokenSettings,
                             tokenValues,
                             selectedTokensList,
-                            printHelper,
                             fragment
                         )
 
@@ -126,65 +206,12 @@ class Utils {
                         tokenSettings,
                         tokenValues,
                         selectedTokensList,
-                        printHelper,
                         fragment
                     )
 
                     mainHandler.post {
                         // Update UI
                         fragment.clearFields()
-                    }
-                }
-            }
-        }
-
-        private fun prepareAndPrintToken(
-            viewModel: TokensViewModel,
-            tokenSettings: LayoutSettings,
-            tokenValues: Array<Float>,
-            selectedTokensList: ArrayList<Tokens>,
-            printHelper: AP80PrintHelper,
-            fragment: TokensFragment
-        ) {
-            var tokenPaymentValues = tokenValues
-
-            selectedTokensList.forEach { token ->
-
-                // Update report in database
-                val reportToBeUpdated = Report(
-                    cashOneTokensSold = token.cashOne,
-                    cashTwoTokensSold = token.cashTwo,
-                    cashFourTokensSold = token.cashFour,
-                    cashFiveTokensSold = token.cashFive,
-                    cashSixTokensSold = token.cashSix,
-                    cashEightTokensSold = token.cashEight,
-                    cashTenTokensSold = token.cashTen,
-                    paymentCash = tokenPaymentValues[0],
-                    paymentPix = tokenPaymentValues[1],
-                    paymentDebit = tokenPaymentValues[2],
-                    paymentCredit = tokenPaymentValues[3]
-                )
-
-                tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
-
-                viewModel.updateReportTokens(reportToBeUpdated)
-
-                // Print tokens
-                val auxTokensList = listOf(
-                    Pair(token.cashOne, "R$ 1,00"),
-                    Pair(token.cashTwo, "R$ 2,00"),
-                    Pair(token.cashFour, "R$ 4,00"),
-                    Pair(token.cashFive, "R$ 5,00"),
-                    Pair(token.cashSix, "R$ 6,00"),
-                    Pair(token.cashEight, "R$ 8,00"),
-                    Pair(token.cashTen, "R$ 10,00")
-                )
-
-                auxTokensList.forEach { tokensPair ->
-                    if (tokensPair.first > 0) {
-                        for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second, tokenSettings, printHelper, fragment)
-                        }
                     }
                 }
             }
@@ -225,14 +252,99 @@ class Utils {
         }
 
         @SuppressLint("SimpleDateFormat")
+        private fun printSangria(sangria: Float) {
+            val calendar = Calendar.getInstance()
+            val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+            val date = format.format(calendar.time)
+
+            for (i in 1..2) {
+                printHelper.printData("Sangria", 100, 1, false, 1, 80, 0)
+                printSpace(1)
+                printHelper.printData("R$ ${String.format("%.2f", sangria)}", 50, 0, false, 0, 80, 0)
+                printHelper.printData(date, 50, 0, false, 0, 80, 0)
+                printSpace(4)
+                printHelper.printData("ASS ..................................", 30, 0, false, 0, 80, 0)
+                printSpace(3)
+                printHelper.printStart()
+                printHelper.cutPaper(1)
+            }
+        }
+
+        private fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {
+            val constraintLayout = inflatedLayout.findViewById<View>(R.id.token_layout) as ConstraintLayout
+
+            constraintLayout.isDrawingCacheEnabled = true
+
+            constraintLayout.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+
+            constraintLayout.layout(0, 0, constraintLayout.measuredWidth, constraintLayout.measuredHeight)
+            constraintLayout.buildDrawingCache(true)
+
+            return constraintLayout.drawingCache
+        }
+
+        private fun prepareAndPrintToken(
+            viewModel: TokensViewModel,
+            tokenSettings: LayoutSettings,
+            tokenValues: Array<Float>,
+            selectedTokensList: ArrayList<Tokens>,
+            fragment: TokensFragment
+        ) {
+            var tokenPaymentValues = tokenValues
+
+            selectedTokensList.forEach { token ->
+
+                // Update report in database
+                val reportToBeUpdated = Report(
+                    cashOneTokensSold = token.cashOne,
+                    cashTwoTokensSold = token.cashTwo,
+                    cashFourTokensSold = token.cashFour,
+                    cashFiveTokensSold = token.cashFive,
+                    cashSixTokensSold = token.cashSix,
+                    cashEightTokensSold = token.cashEight,
+                    cashTenTokensSold = token.cashTen,
+                    paymentCash = tokenPaymentValues[0],
+                    paymentPix = tokenPaymentValues[1],
+                    paymentDebit = tokenPaymentValues[2],
+                    paymentCredit = tokenPaymentValues[3]
+                )
+
+                tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
+
+                viewModel.updateReportTokens(reportToBeUpdated)
+
+                // Print tokens
+                val auxTokensList = listOf(
+                    Pair(token.cashOne, "R$ 1,00"),
+                    Pair(token.cashTwo, "R$ 2,00"),
+                    Pair(token.cashFour, "R$ 4,00"),
+                    Pair(token.cashFive, "R$ 5,00"),
+                    Pair(token.cashSix, "R$ 6,00"),
+                    Pair(token.cashEight, "R$ 8,00"),
+                    Pair(token.cashTen, "R$ 10,00")
+                )
+
+                auxTokensList.forEach { tokensPair ->
+                    if (tokensPair.first > 0) {
+                        for (i in 1..tokensPair.first) {
+                            printToken(tokensPair.second, tokenSettings, fragment)
+                        }
+                    }
+                }
+            }
+        }
+
+        @SuppressLint("SimpleDateFormat", "InflateParams")
         private fun printToken(
             tokenValue: String,
             tokenSettings: LayoutSettings,
-            printHelper: AP80PrintHelper,
             fragment: TokensFragment
         ) {
             val calendar = Calendar.getInstance()
-            val format = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
+            val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
             val date = format.format(calendar.time)
 
             val tokenLayout = fragment.layoutInflater.inflate(R.layout.token_layout, null)
@@ -256,12 +368,12 @@ class Utils {
             printHelper.printData(date, 30, 0, false, 0, 80, 0)
             printHelper.printData(tokenSettings.footer, 40, 0, false, 0, 80, 0)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printSpace(2, printHelper)
+            printSpace(2)
             printHelper.printStart()
             printHelper.cutPaper(1)
         }
 
-        private fun printSpace(spaceSize: Int, printHelper: AP80PrintHelper) {
+        private fun printSpace(spaceSize: Int) {
             if (spaceSize < 0) {
                 return
             }

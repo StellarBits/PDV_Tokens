@@ -14,7 +14,7 @@
         android:layout_marginEnd="25dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/operational_right_panel"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:spanCount="4"
@@ -22,7 +22,7 @@
         tools:listitem="@layout/tokens_item" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/operational_right_panel"
         android:layout_width="225dp"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -31,10 +31,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/bt_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/baseline_close_24"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tv_total_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
             android:gravity="center"
             android:text="Total:"
             android:textSize="42sp"
@@ -111,17 +123,17 @@
             android:backgroundTint="@android:color/holo_blue_dark"
             android:text="Limpar"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/bt_exit"
+            app:layout_constraintEnd_toStartOf="@+id/bt_sangria"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/bt_exit"
+            android:id="@+id/bt_sangria"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:backgroundTint="@android:color/holo_red_light"
-            android:text="Sair"
+            android:text="Sangria"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
