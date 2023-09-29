@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
@@ -26,6 +28,7 @@ import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.concurrent.Executors
 
 class Utils {
     companion object {
@@ -84,14 +87,25 @@ class Utils {
 
                 builder.setPositiveButton("Sim") { dialog, _ ->
                     dialog.dismiss()
-                    prepareAndPrintToken(
-                        viewModel,
-                        tokenSettings,
-                        tokenValues,
-                        selectedTokensList,
-                        printHelper,
-                        fragment
-                    )
+
+                    Executors.newSingleThreadExecutor().execute {
+                        val mainHandler = Handler(Looper.getMainLooper())
+
+                        // Sync print
+                        prepareAndPrintToken(
+                            viewModel,
+                            tokenSettings,
+                            tokenValues,
+                            selectedTokensList,
+                            printHelper,
+                            fragment
+                        )
+
+                        mainHandler.post {
+                            // Update UI
+                            fragment.clearFields()
+                        }
+                    }
                 }
 
                 builder.setNegativeButton("Não") { dialog, _ ->
@@ -103,14 +117,24 @@ class Utils {
                 val alertDialog = builder.create()
                 alertDialog.show()
             } else {
-                prepareAndPrintToken(
-                    viewModel,
-                    tokenSettings,
-                    tokenValues,
-                    selectedTokensList,
-                    printHelper,
-                    fragment
-                )
+                Executors.newSingleThreadExecutor().execute {
+                    val mainHandler = Handler(Looper.getMainLooper())
+
+                    // Sync print
+                    prepareAndPrintToken(
+                        viewModel,
+                        tokenSettings,
+                        tokenValues,
+                        selectedTokensList,
+                        printHelper,
+                        fragment
+                    )
+
+                    mainHandler.post {
+                        // Update UI
+                        fragment.clearFields()
+                    }
+                }
             }
         }
 
@@ -164,8 +188,6 @@ class Utils {
                     }
                 }
             }
-
-            fragment.clearFields()
         }
 
         fun showInSubDisplay(subLcdHelper: SubLcdHelper, fragment: InitialCashFragment, layoutSettings: LayoutSettings) {
