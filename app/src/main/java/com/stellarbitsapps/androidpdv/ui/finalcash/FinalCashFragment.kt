@@ -88,66 +88,58 @@ class FinalCashFragment : Fragment() {
             viewModel.getReport()
             viewModel.report.observe(viewLifecycleOwner) { report ->
 
-                Executors.newSingleThreadExecutor().execute {
-                    val mainHandler = Handler(Looper.getMainLooper())
+                val calendar = Calendar.getInstance()
+                val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
 
-                    // Sync print
-                    val calendar = Calendar.getInstance()
-                    val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+                val initialDate = format.format(report.initialDate)
+                val finalDate = format.format(calendar.time)
 
-                    val initialDate = format.format(report.initialDate)
-                    val finalDate = format.format(calendar.time)
+                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                printSpace(1)
+                printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text} - $finalDate", 30, 0, false, 0, 80, 0)
+                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                printSpace(1)
+                printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 2,00  - Qtde x ${report.cashTwoTokensSold} - Total R$: ${String.format("%.2f", 2 * report.cashTwoTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 4,00  - Qtde x ${report.cashFourTokensSold} - Total R$: ${String.format("%.2f", 4 * report.cashFourTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 5,00  - Qtde x ${report.cashFiveTokensSold} - Total R$: ${String.format("%.2f", 5 * report.cashFiveTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 6,00  - Qtde x ${report.cashSixTokensSold} - Total R$: ${String.format("%.2f", 6 * report.cashSixTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 8,00  - Qtde x ${report.cashEightTokensSold} - Total R$: ${String.format("%.2f", 8 * report.cashEightTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 10,00 - Qtde x ${report.cashTenTokensSold} - Total R$: ${String.format("%.2f", 10 * report.cashTenTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                printSpace(1)
+                printHelper.printData("Total Dinheiro - R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Pix      - R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Débito   - R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Crédito  - R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Geral    - R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                printSpace(1)
+                printHelper.printData("Sangria:", 30, 0, false, 0, 80, 0)
 
-                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                    printSpace(1)
-                    printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text} - $finalDate", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                    printSpace(1)
-                    printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 2,00  - Qtde x ${report.cashTwoTokensSold} - Total R$: ${String.format("%.2f", 2 * report.cashTwoTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 4,00  - Qtde x ${report.cashFourTokensSold} - Total R$: ${String.format("%.2f", 4 * report.cashFourTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 5,00  - Qtde x ${report.cashFiveTokensSold} - Total R$: ${String.format("%.2f", 5 * report.cashFiveTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 6,00  - Qtde x ${report.cashSixTokensSold} - Total R$: ${String.format("%.2f", 6 * report.cashSixTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 8,00  - Qtde x ${report.cashEightTokensSold} - Total R$: ${String.format("%.2f", 8 * report.cashEightTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("R$ 10,00 - Qtde x ${report.cashTenTokensSold} - Total R$: ${String.format("%.2f", 10 * report.cashTenTokensSold.toFloat())}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                    printSpace(1)
-                    printHelper.printData("Total Dinheiro - R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("Total Pix      - R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("Total Débito   - R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("Total Crédito  - R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("Total Geral    - R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit)}", 30, 0, false, 0, 80, 0)
-                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                    printSpace(1)
-                    printHelper.printData("Sangria:", 30, 0, false, 0, 80, 0)
-
-                    sangria.forEach {
-                        val date = format.format(it.date)
-                        val text = "R$: ${String.format("%.2f", it.sangria)} - $date"
-                        printHelper.printData(text, 30, 0, false, 0, 80, 0)
-                    }
-
-                    printSpace(3)
-                    printHelper.printStart()
-                    printHelper.cutPaper(1)
-
-                    val finalValue = if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
-                        binding.edtFinalCash.text.toString()
-                            .replace("R$", "")
-                            .replace(",", ".")
-                            .trim()
-                            .toFloat()
-                    }
-
-                    viewModel.reportSangria()
-                    viewModel.closeCashRegister(finalValue, calendar)
-
-                    mainHandler.post {
-                        // Update UI
-                        findNavController().navigate(R.id.initialCashFragment)
-                    }
+                sangria.forEach {
+                    val date = format.format(it.date)
+                    val text = "R$: ${String.format("%.2f", it.sangria)} - $date"
+                    printHelper.printData(text, 30, 0, false, 0, 80, 0)
                 }
+
+                printSpace(3)
+                printHelper.printStart()
+                printHelper.cutPaper(1)
+
+                val finalValue = if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
+                    binding.edtFinalCash.text.toString()
+                        .replace("R$", "")
+                        .replace(",", ".")
+                        .trim()
+                        .toFloat()
+                }
+
+                viewModel.reportSangria()
+                viewModel.closeCashRegister(finalValue, calendar)
+
+                findNavController().navigate(R.id.initialCashFragment)
             }
         }
     }

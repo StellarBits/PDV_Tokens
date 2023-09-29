@@ -47,6 +47,8 @@ class TokensFragment : Fragment() {
 
     private var tokenSettings = LayoutSettings()
 
+    private var isPrinting = false
+
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,29 +74,45 @@ class TokensFragment : Fragment() {
         }
 
         binding.btCash.setOnClickListener {
-            // Cash, Pix, Debit, Credit in this order
-            val tokenValues = arrayOf(tokenSum, 0f, 0f, 0f)
-            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            if (!isPrinting) {
+                isPrinting = true
 
-            Utils.showCashDialog(this, viewModel, false, tokenSum)
+                // Cash, Pix, Debit, Credit in this order
+                val tokenValues = arrayOf(tokenSum, 0f, 0f, 0f)
+                Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+
+                Utils.showCashDialog(this, viewModel, false, tokenSum)
+            }
         }
 
         binding.btPix.setOnClickListener {
-            // Cash, Pix, Debit, Credit in this order
-            val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
-            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            if (!isPrinting) {
+                isPrinting = true
+
+                // Cash, Pix, Debit, Credit in this order
+                val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
+                Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            }
         }
 
         binding.btDebit.setOnClickListener {
-            // Cash, Pix, Debit, Credit in this order
-            val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
-            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            if (!isPrinting) {
+                isPrinting = true
+
+                // Cash, Pix, Debit, Credit in this order
+                val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
+                Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            }
         }
 
         binding.btCredit.setOnClickListener {
-            // Cash, Pix, Debit, Credit in this order
-            val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
-            Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            if (!isPrinting) {
+                isPrinting = true
+
+                // Cash, Pix, Debit, Credit in this order
+                val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
+                Utils.tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
+            }
         }
 
         binding.btSangria.setOnClickListener {
@@ -127,6 +145,7 @@ class TokensFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     fun clearFields() {
+        isPrinting = false
         binding.tvTotaValue.text = "R$ 0,00"
         tokenSum = 0f
         selectedTokensList.clear()

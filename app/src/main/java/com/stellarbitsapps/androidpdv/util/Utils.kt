@@ -84,16 +84,7 @@ class Utils {
                 }
 
                 if (isSangria) {
-                    Executors.newSingleThreadExecutor().execute {
-                        val mainHandler = Handler(Looper.getMainLooper())
-
-                        // Sync print
-                        printSangria(valueEntered)
-
-                        mainHandler.post {
-                            // Update UI if necessary
-                        }
-                    }
+                    printSangria(valueEntered)
                     viewModel.insertSangria(valueEntered)
                 } else {
                     val cashChange = valueEntered - tokenSum
