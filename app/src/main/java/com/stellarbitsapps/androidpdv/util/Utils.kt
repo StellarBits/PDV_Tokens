@@ -78,6 +78,7 @@ class Utils {
                 val valueEntered = if (amountReceivedEditText.text.toString().isEmpty()) 0f else {
                     amountReceivedEditText.text.toString()
                         .replace("R$", "")
+                        .replace(".", "")
                         .replace(",", ".")
                         .trim()
                         .toFloat()
@@ -142,67 +143,53 @@ class Utils {
             return current
         }
 
-        fun tokenPayment(
+        fun prepareAndPrintToken(
             viewModel: TokensViewModel,
             tokenSettings: LayoutSettings,
             tokenValues: Array<Float>,
             selectedTokensList: ArrayList<Tokens>,
             fragment: TokensFragment
         ) {
-            if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
-                val builder = AlertDialog.Builder(fragment.requireContext())
+            var tokenPaymentValues = tokenValues
 
-                builder.setTitle("Atenção!")
-                builder.setMessage("O layout das fichas não foi configurado corretamente." +
-                        "\nDeseja imprimir mesmo assim?\n\nEm caso negativo, a operação será cancelada e o caixa reiniciado.")
-                builder.setIcon(android.R.drawable.ic_dialog_alert)
+            selectedTokensList.forEach { token ->
 
-                builder.setPositiveButton("Sim") { dialog, _ ->
-                    dialog.dismiss()
+                // Update report in database
+                val reportToBeUpdated = Report(
+                    cashOneTokensSold = token.cashOne,
+                    cashTwoTokensSold = token.cashTwo,
+                    cashFourTokensSold = token.cashFour,
+                    cashFiveTokensSold = token.cashFive,
+                    cashSixTokensSold = token.cashSix,
+                    cashEightTokensSold = token.cashEight,
+                    cashTenTokensSold = token.cashTen,
+                    paymentCash = tokenPaymentValues[0],
+                    paymentPix = tokenPaymentValues[1],
+                    paymentDebit = tokenPaymentValues[2],
+                    paymentCredit = tokenPaymentValues[3]
+                )
 
-                    Executors.newSingleThreadExecutor().execute {
-                        val mainHandler = Handler(Looper.getMainLooper())
+                tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
 
-                        // Sync print
-                        prepareAndPrintToken(
-                            viewModel,
-                            tokenSettings,
-                            tokenValues,
-                            selectedTokensList,
-                            fragment
-                        )
+                viewModel.updateReportTokens(reportToBeUpdated)
 
-                        mainHandler.post {
-                            // Update UI
-                            fragment.clearFields()
+                // Print tokens
+                val auxTokensList = listOf(
+                    Pair(token.cashOne, "R$ 1,00"),
+                    Pair(token.cashTwo, "R$ 2,00"),
+                    Pair(token.cashFour, "R$ 4,00"),
+                    Pair(token.cashFive, "R$ 5,00"),
+                    Pair(token.cashSix, "R$ 6,00"),
+                    Pair(token.cashEight, "R$ 8,00"),
+                    Pair(token.cashTen, "R$ 10,00")
+                )
+
+                auxTokensList.forEach { tokensPair ->
+                    if (tokensPair.first > 0) {
+                        for (i in 1..tokensPair.first) {
+                            printToken(tokensPair.second, tokenSettings, fragment)
+                            Thread.sleep(1250)
                         }
-                    }
-                }
-
-                builder.setNegativeButton("Não") { dialog, _ ->
-                    dialog.dismiss()
-                    viewModel.deleteReport()
-                    fragment.findNavController().navigate(R.id.configureTokenLayoutFragment)
-                }
-
-                val alertDialog = builder.create()
-                alertDialog.show()
-            } else {
-                Executors.newSingleThreadExecutor().execute {
-                    val mainHandler = Handler(Looper.getMainLooper())
-
-                    // Sync print
-                    prepareAndPrintToken(
-                        viewModel,
-                        tokenSettings,
-                        tokenValues,
-                        selectedTokensList,
-                        fragment
-                    )
-
-                    mainHandler.post {
-                        // Update UI
-                        fragment.clearFields()
                     }
                 }
             }
@@ -277,57 +264,6 @@ class Utils {
             return constraintLayout.drawingCache
         }
 
-        private fun prepareAndPrintToken(
-            viewModel: TokensViewModel,
-            tokenSettings: LayoutSettings,
-            tokenValues: Array<Float>,
-            selectedTokensList: ArrayList<Tokens>,
-            fragment: TokensFragment
-        ) {
-            var tokenPaymentValues = tokenValues
-
-            selectedTokensList.forEach { token ->
-
-                // Update report in database
-                val reportToBeUpdated = Report(
-                    cashOneTokensSold = token.cashOne,
-                    cashTwoTokensSold = token.cashTwo,
-                    cashFourTokensSold = token.cashFour,
-                    cashFiveTokensSold = token.cashFive,
-                    cashSixTokensSold = token.cashSix,
-                    cashEightTokensSold = token.cashEight,
-                    cashTenTokensSold = token.cashTen,
-                    paymentCash = tokenPaymentValues[0],
-                    paymentPix = tokenPaymentValues[1],
-                    paymentDebit = tokenPaymentValues[2],
-                    paymentCredit = tokenPaymentValues[3]
-                )
-
-                tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
-
-                viewModel.updateReportTokens(reportToBeUpdated)
-
-                // Print tokens
-                val auxTokensList = listOf(
-                    Pair(token.cashOne, "R$ 1,00"),
-                    Pair(token.cashTwo, "R$ 2,00"),
-                    Pair(token.cashFour, "R$ 4,00"),
-                    Pair(token.cashFive, "R$ 5,00"),
-                    Pair(token.cashSix, "R$ 6,00"),
-                    Pair(token.cashEight, "R$ 8,00"),
-                    Pair(token.cashTen, "R$ 10,00")
-                )
-
-                auxTokensList.forEach { tokensPair ->
-                    if (tokensPair.first > 0) {
-                        for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second, tokenSettings, fragment)
-                        }
-                    }
-                }
-            }
-        }
-
         @SuppressLint("SimpleDateFormat", "InflateParams")
         private fun printToken(
             tokenValue: String,
@@ -362,6 +298,7 @@ class Utils {
             printSpace(2)
             printHelper.printStart()
             printHelper.cutPaper(1)
+            printHelper.clean()
         }
 
         private fun printSpace(spaceSize: Int) {

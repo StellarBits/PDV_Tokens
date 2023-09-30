@@ -40,7 +40,7 @@
         android:gravity="center"
         android:textSize="24sp"
         android:background="@drawable/edittext_round_background"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

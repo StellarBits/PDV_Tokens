@@ -95,6 +95,7 @@ class RegisterTokenFragment : Fragment() {
         binding.btRegisterToken.setOnClickListener {
             val value = binding.edtCashValue.text.toString()
                 .replace("R$", "")
+                .replace(".", "")
                 .replace(",", ".")
                 .trim()
                 .toFloat()

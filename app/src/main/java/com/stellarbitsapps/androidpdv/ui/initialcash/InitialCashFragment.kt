@@ -64,6 +64,7 @@ class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
             val initialCash = if (binding.edtInitialCash.text.toString().isEmpty()) 0f else {
                 binding.edtInitialCash.text.toString()
                     .replace("R$", "")
+                    .replace(".", "")
                     .replace(",", ".")
                     .trim()
                     .toFloat()
