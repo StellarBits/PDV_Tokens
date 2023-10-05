@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.TokensItemBinding
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
@@ -32,7 +33,12 @@ class TokensAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(item: Tokens, tokensFragment: TokensFragment) {
             with(binding) {
-                binding.tvCounter.text = "0"
+                btToken.backgroundTintList = if (item.value > 10f)
+                    btToken.resources.getColorStateList(R.color.orange_dark, null)
+                else
+                    btToken.resources.getColorStateList(R.color.orange_light, null)
+
+                tvCounter.text = "0"
                 tvCounter.visibility = View.GONE
                 btToken.text = "R$ " + String.format("%.2f", item.value)
                 token = item
