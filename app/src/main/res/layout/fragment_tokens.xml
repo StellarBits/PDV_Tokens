@@ -11,7 +11,7 @@
         android:id="@+id/rv_cash_buttons"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginEnd="25dp"
+        android:layout_marginEnd="10dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/operational_right_panel"
@@ -23,10 +23,10 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/operational_right_panel"
-        android:layout_width="225dp"
+        android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:background="@color/cardview_dark_background"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -49,8 +49,8 @@
             android:layout_marginTop="50dp"
             android:gravity="center"
             android:text="Total:"
-            android:textSize="42sp"
             android:textColor="@color/white"
+            android:textSize="42sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -70,50 +70,49 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_total_title" />
 
-        <Button
-            android:id="@+id/bt_cash"
-            android:layout_width="match_parent"
+        <GridLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="25dp"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:text="Dinheiro"
+            android:columnCount="2"
+            android:padding="2dp"
+            app:layout_constraintBottom_toTopOf="@+id/bt_sangria"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_tota_value" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_tota_value">
 
-        <Button
-            android:id="@+id/bt_pix"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:text="Pix"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bt_cash" />
+            <Button
+                android:id="@+id/bt_cash"
+                android:layout_width="110dp"
+                android:layout_height="80dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:text="Dinheiro"/>
 
-        <Button
-            android:id="@+id/bt_debit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:text="Débito"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bt_pix" />
+            <Button
+                android:id="@+id/bt_pix"
+                android:layout_width="110dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="2dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:text="Pix" />
 
-        <Button
-            android:id="@+id/bt_credit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:text="Crédito"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bt_debit" />
+            <Button
+                android:id="@+id/bt_credit"
+                android:layout_width="110dp"
+                android:layout_height="80dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:text="Crédito" />
+
+            <Button
+                android:id="@+id/bt_debit"
+                android:layout_width="110dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="2dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:text="Débito" />
+
+        </GridLayout>
 
         <Button
             android:id="@+id/bt_clean"
