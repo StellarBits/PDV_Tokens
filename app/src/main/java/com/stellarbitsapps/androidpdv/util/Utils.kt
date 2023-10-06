@@ -2,10 +2,13 @@ package com.stellarbitsapps.androidpdv.util
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -15,6 +18,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -25,6 +29,7 @@ import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
+import com.stellarbitsapps.androidpdv.ui.MainActivity.Companion.mainActivityContentResolver
 import com.stellarbitsapps.androidpdv.ui.MainActivity.Companion.printHelper
 import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
@@ -37,6 +42,7 @@ import java.util.concurrent.Executors
 
 class Utils {
     companion object {
+        @RequiresApi(Build.VERSION_CODES.N_MR1)
         @SuppressLint("SetTextI18n")
         fun showCashDialog(fragment: Fragment, viewModel: TokensViewModel, isSangria: Boolean, tokenSum: Float) {
             val inflater = LayoutInflater.from(fragment.requireContext())
@@ -229,6 +235,12 @@ class Utils {
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.N_MR1)
+        fun getDeviceName(): String {
+            return Settings.Global.getString(mainActivityContentResolver, Settings.Global.DEVICE_NAME)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N_MR1)
         @SuppressLint("SimpleDateFormat")
         private fun printSangria(sangria: Float) {
             val calendar = Calendar.getInstance()
@@ -236,7 +248,7 @@ class Utils {
             val date = format.format(calendar.time)
 
             for (i in 1..2) {
-                printHelper.printData("Sangria", 100, 1, false, 1, 80, 0)
+                printHelper.printData("Sangria: ${getDeviceName()}", 60, 1, false, 1, 80, 0)
                 printSpace(1)
                 printHelper.printData("R$ ${String.format("%.2f", sangria)}", 50, 0, false, 0, 80, 0)
                 printHelper.printData(date, 50, 0, false, 0, 80, 0)
