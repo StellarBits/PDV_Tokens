@@ -105,7 +105,7 @@ class FinalCashFragment : Fragment() {
                 printHelper.printData(Utils.getDeviceName(), 70, 1, false, 1, 80, 1)
                 printSpace(1)
                 printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text} - $finalDate", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text.toString().replace(".", "")} - $finalDate", 30, 0, false, 0, 80, 0)
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
                 printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
