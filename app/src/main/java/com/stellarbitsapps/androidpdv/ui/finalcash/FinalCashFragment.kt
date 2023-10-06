@@ -2,6 +2,7 @@ package com.stellarbitsapps.androidpdv.ui.finalcash
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
+import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.Handler
@@ -14,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -48,6 +50,7 @@ class FinalCashFragment : Fragment() {
 
     private lateinit var printHelper: AP80PrintHelper
 
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -80,6 +83,7 @@ class FinalCashFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
     @SuppressLint("SimpleDateFormat")
     private fun printReport() {
         viewModel.getSangria()
@@ -98,17 +102,19 @@ class FinalCashFragment : Fragment() {
 
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
+                printHelper.printData(Utils.getDeviceName(), 70, 1, false, 1, 80, 1)
+                printSpace(1)
                 printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
                 printHelper.printData("Fechamento:\n${if (binding.edtFinalCash.text.toString().isEmpty()) "R$ 0,00" else binding.edtFinalCash.text} - $finalDate", 30, 0, false, 0, 80, 0)
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
-                printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 2,00  - Qtde x ${report.cashTwoTokensSold} - Total R$: ${String.format("%.2f", 2 * report.cashTwoTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 4,00  - Qtde x ${report.cashFourTokensSold} - Total R$: ${String.format("%.2f", 4 * report.cashFourTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 5,00  - Qtde x ${report.cashFiveTokensSold} - Total R$: ${String.format("%.2f", 5 * report.cashFiveTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 6,00  - Qtde x ${report.cashSixTokensSold} - Total R$: ${String.format("%.2f", 6 * report.cashSixTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 8,00  - Qtde x ${report.cashEightTokensSold} - Total R$: ${String.format("%.2f", 8 * report.cashEightTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 10,00 - Qtde x ${report.cashTenTokensSold} - Total R$: ${String.format("%.2f", 10 * report.cashTenTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 1,00  - Qtde x ${report.cashOneTokensSold} - Total R$: ${String.format("%.2f", report.cashOneTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 2,00  - Qtde x ${report.cashTwoTokensSold} - Total R$: ${String.format("%.2f", 2 * report.cashTwoTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 4,00  - Qtde x ${report.cashFourTokensSold} - Total R$: ${String.format("%.2f", 4 * report.cashFourTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 5,00  - Qtde x ${report.cashFiveTokensSold} - Total R$: ${String.format("%.2f", 5 * report.cashFiveTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 6,00  - Qtde x ${report.cashSixTokensSold} - Total R$: ${String.format("%.2f", 6 * report.cashSixTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 8,00  - Qtde x ${report.cashEightTokensSold} - Total R$: ${String.format("%.2f", 8 * report.cashEightTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
+                printHelper.printData("R$ 10,00 - Qtde x ${report.cashTenTokensSold} - Total R$: ${String.format("%.2f", 10 * report.cashTenTokensSold.toFloat())}", 26, 0, false, 0, 80, 0)
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
                 printHelper.printData("Total Dinheiro ..... R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)

@@ -1,6 +1,7 @@
 package com.stellarbitsapps.androidpdv.ui
 
 import android.Manifest
+import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ val PERMISSIONS_STORAGE = arrayOf(
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        lateinit var mainActivityContentResolver: ContentResolver
         lateinit var printHelper: AP80PrintHelper
     }
 
@@ -25,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mainActivityContentResolver = contentResolver
 
         printHelper = AP80PrintHelper.getInstance()
         printHelper.initPrint(applicationContext)
