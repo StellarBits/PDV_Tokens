@@ -94,6 +94,8 @@ class FinalCashFragment : Fragment() {
                 val initialDate = format.format(report.initialDate)
                 val finalDate = format.format(calendar.time)
 
+                var sangriaSum = 0f
+
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
                 printHelper.printData("Abertura:\nR$ ${String.format("%.2f", report.initialCash)} - $initialDate", 30, 0, false, 0, 80, 0)
@@ -109,11 +111,12 @@ class FinalCashFragment : Fragment() {
                 printHelper.printData("R$ 10,00 - Qtde x ${report.cashTenTokensSold} - Total R$: ${String.format("%.2f", 10 * report.cashTenTokensSold.toFloat())}", 24, 0, false, 0, 80, 0)
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
-                printHelper.printData("Total Dinheiro - R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Pix      - R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Débito   - R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Crédito  - R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Geral    - R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Dinheiro ..... R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Pix .......... R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Débito ....... R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Crédito ...... R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Abertura do caixa .. R$: ${String.format("%.2f", report.initialCash)}", 30, 0, false, 0, 80, 0)
+                printHelper.printData("Total Geral ........ R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit + report.initialCash)}", 30, 0, false, 0, 80, 0)
                 printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
                 printSpace(1)
                 printHelper.printData("Sangria:", 30, 0, false, 0, 80, 0)
@@ -121,8 +124,12 @@ class FinalCashFragment : Fragment() {
                 sangria.forEach {
                     val date = format.format(it.date)
                     val text = "R$: ${String.format("%.2f", it.sangria)} - $date"
+                    sangriaSum += it.sangria
                     printHelper.printData(text, 30, 0, false, 0, 80, 0)
                 }
+
+                printSpace(1)
+                printHelper.printData("Total de sangrias R$: ${String.format("%.2f", sangriaSum)}", 30, 0, false, 0, 80, 0)
 
                 printSpace(3)
                 printHelper.printStart()
