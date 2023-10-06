@@ -33,7 +33,7 @@ class TokensAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(item: Tokens, tokensFragment: TokensFragment) {
             with(binding) {
-                btToken.backgroundTintList = if (item.value > 10f)
+                btToken.backgroundTintList = if (item.value >= 10f)
                     btToken.resources.getColorStateList(R.color.orange_dark, null)
                 else
                     btToken.resources.getColorStateList(R.color.orange_light, null)
@@ -43,6 +43,21 @@ class TokensAdapter(
                 btToken.text = "R$ " + String.format("%.2f", item.value)
                 token = item
                 executePendingBindings()
+            }
+
+            binding.tvCounter.setOnClickListener {
+                var count = binding.tvCounter.text.toString().toInt()
+                count -= 1
+
+                binding.tvCounter.visibility = if (count == 0) {
+                    View.GONE
+                } else {
+                    View.VISIBLE
+                }
+
+                binding.tvCounter.text = count.toString()
+
+                tokensFragment.tokenCounterClicked(item)
             }
 
             binding.btToken.setOnClickListener {

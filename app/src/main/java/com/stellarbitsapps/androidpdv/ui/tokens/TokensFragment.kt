@@ -263,4 +263,10 @@ class TokensFragment : Fragment() {
         tokenSum += token.value
         binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
     }
+
+    fun tokenCounterClicked(token: Tokens) {
+        selectedTokensList.remove(token)
+        tokenSum -= token.value
+        binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
+    }
 }
