@@ -119,7 +119,7 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="@android:color/holo_blue_dark"
+            android:backgroundTint="@android:color/darker_gray"
             android:text="Limpar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/bt_sangria"
