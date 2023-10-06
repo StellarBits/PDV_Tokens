@@ -99,6 +99,8 @@ class Utils {
                 }
             }
 
+            amountReceivedEditText.requestFocus()
+
             if (isSangria) {
                 totalCashChangeTextView.visibility = View.GONE
             } else {

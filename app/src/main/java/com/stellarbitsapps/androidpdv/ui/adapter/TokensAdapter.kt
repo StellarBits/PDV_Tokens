@@ -34,9 +34,9 @@ class TokensAdapter(
         fun bind(item: Tokens, tokensFragment: TokensFragment) {
             with(binding) {
                 btToken.backgroundTintList = if (item.value >= 10f)
-                    btToken.resources.getColorStateList(R.color.orange_dark, null)
+                    btToken.resources.getColorStateList(android.R.color.holo_blue_dark, null)
                 else
-                    btToken.resources.getColorStateList(R.color.orange_light, null)
+                    btToken.resources.getColorStateList(android.R.color.holo_orange_dark, null)
 
                 tvCounter.text = "0"
                 tvCounter.visibility = View.GONE
