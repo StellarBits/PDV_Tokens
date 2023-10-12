@@ -32,13 +32,24 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
+            android:id="@+id/bt_clear"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginStart="7dp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="Limpar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
             android:id="@+id/bt_close"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="40dp"
             android:layout_marginTop="7dp"
             android:layout_marginEnd="7dp"
-            android:text="Fechar"
             android:backgroundTint="@android:color/holo_red_dark"
+            android:text="Fechar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -86,7 +97,7 @@
                 android:layout_height="80dp"
                 android:layout_marginEnd="2dp"
                 android:backgroundTint="@android:color/holo_green_dark"
-                android:text="Dinheiro"/>
+                android:text="Dinheiro" />
 
             <Button
                 android:id="@+id/bt_pix"
@@ -115,12 +126,12 @@
         </GridLayout>
 
         <Button
-            android:id="@+id/bt_clean"
+            android:id="@+id/bt_change"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="@android:color/darker_gray"
-            android:text="Limpar"
+            android:backgroundTint="@color/darkest_green"
+            android:text="Troco"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/bt_sangria"
             app:layout_constraintHorizontal_bias="0.5"
@@ -136,7 +147,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/bt_clean" />
+            app:layout_constraintStart_toEndOf="@+id/bt_change" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
