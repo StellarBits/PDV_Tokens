@@ -2,11 +2,8 @@ package com.stellarbitsapps.androidpdv.ui.tokens
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +23,6 @@ import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
 import com.stellarbitsapps.androidpdv.util.Utils
-import java.util.concurrent.Executors
 
 
 class TokensFragment : Fragment() {
@@ -54,6 +50,8 @@ class TokensFragment : Fragment() {
 
     private var tokenSum = 0f
 
+    private var previousTokenSum = 0f
+
     private var selectedTokensList = arrayListOf<Tokens>()
 
     private var tokenSettings = LayoutSettings()
@@ -70,8 +68,9 @@ class TokensFragment : Fragment() {
 
         loadTokenLayoutSettings()
 
-        binding.btClean.setOnClickListener {
+        binding.btClear.setOnClickListener {
             clearFields()
+            previousTokenSum = 0f
         }
 
         binding.btClose.setOnClickListener {
@@ -88,18 +87,18 @@ class TokensFragment : Fragment() {
         binding.btCash.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+                previousTokenSum = tokenSum
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(tokenSum, 0f, 0f, 0f)
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
-
-                Utils.showCashDialog(this, viewModel, false, tokenSum)
             }
         }
 
         binding.btPix.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+                previousTokenSum = tokenSum
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
@@ -110,6 +109,7 @@ class TokensFragment : Fragment() {
         binding.btDebit.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+                previousTokenSum = tokenSum
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
@@ -120,11 +120,16 @@ class TokensFragment : Fragment() {
         binding.btCredit.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+                previousTokenSum = tokenSum
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
             }
+        }
+
+        binding.btChange.setOnClickListener {
+            Utils.showCashDialog(this, viewModel, false, if (tokenSum == 0f) previousTokenSum else tokenSum)
         }
 
         binding.btSangria.setOnClickListener {
@@ -264,12 +269,15 @@ class TokensFragment : Fragment() {
     fun tokenClicked(token: Tokens) {
         selectedTokensList.add(token)
         tokenSum += token.value
+        previousTokenSum = tokenSum
         binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
     }
 
+    @SuppressLint("SetTextI18n")
     fun tokenCounterClicked(token: Tokens) {
         selectedTokensList.remove(token)
         tokenSum -= token.value
+        previousTokenSum = tokenSum
         binding.tvTotaValue.text = "R$ " + String.format("%.2f", tokenSum)
     }
 }
