@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -55,6 +56,10 @@ class TokensFragment : Fragment() {
 
     private var selectedTokensList = arrayListOf<Tokens>()
 
+    private var previousSelectedTokensList = arrayListOf<Tokens>()
+
+    private var previousTokenValues = arrayOf<Float>()
+
     private var tokenSettings = LayoutSettings()
 
     private var isPrinting = false
@@ -71,7 +76,7 @@ class TokensFragment : Fragment() {
 
         binding.btClear.setOnClickListener {
             clearFields()
-            previousTokenSum = 0f
+            clearPreviousFields()
         }
 
         binding.btClose.setOnClickListener {
@@ -86,23 +91,33 @@ class TokensFragment : Fragment() {
         }
 
         binding.btError.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Atenção!")
-                .setMessage("Deseja realmente reportar um erro de R$ ${String.format("%.2f", previousTokenSum)} na impressão?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton("Sim") { _, _ ->
-                    viewModel.insertError(previousTokenSum)
-                }
-                .setNegativeButton("Não", null).show()
+            if (previousTokenSum > 0 && previousSelectedTokensList.isNotEmpty()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Atenção!")
+                    .setMessage("Deseja realmente reportar um erro de R$ ${String.format("%.2f", previousTokenSum)} na impressão\n" +
+                            "e reimprimir as fichas?")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Sim") { _, _ ->
+                        tokenPayment(viewModel, tokenSettings, previousTokenValues, previousSelectedTokensList, this)
+                        viewModel.insertError(previousTokenSum)
+                    }
+                    .setNegativeButton("Não", null).show()
+            } else {
+                Toast.makeText(requireContext(), "Nenhuma impressão realizada anteriormente", Toast.LENGTH_LONG).show()
+            }
         }
 
         binding.btCash.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+
+                clearPreviousFields()
                 previousTokenSum = tokenSum
+                selectedTokensList.forEach { previousSelectedTokensList.add(it) }
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(tokenSum, 0f, 0f, 0f)
+                previousTokenValues = tokenValues
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
             }
         }
@@ -110,10 +125,14 @@ class TokensFragment : Fragment() {
         binding.btPix.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+
+                clearPreviousFields()
                 previousTokenSum = tokenSum
+                selectedTokensList.forEach { previousSelectedTokensList.add(it) }
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, tokenSum, 0f, 0f)
+                previousTokenValues = tokenValues
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
             }
         }
@@ -121,10 +140,14 @@ class TokensFragment : Fragment() {
         binding.btDebit.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+
+                clearPreviousFields()
                 previousTokenSum = tokenSum
+                selectedTokensList.forEach { previousSelectedTokensList.add(it) }
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, 0f, tokenSum, 0f)
+                previousTokenValues = tokenValues
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
             }
         }
@@ -132,10 +155,14 @@ class TokensFragment : Fragment() {
         binding.btCredit.setOnClickListener {
             if (!isPrinting) {
                 isPrinting = true
+
+                clearPreviousFields()
                 previousTokenSum = tokenSum
+                selectedTokensList.forEach { previousSelectedTokensList.add(it) }
 
                 // Cash, Pix, Debit, Credit in this order
                 val tokenValues = arrayOf(0f, 0f, 0f, tokenSum)
+                previousTokenValues = tokenValues
                 tokenPayment(viewModel, tokenSettings, tokenValues, selectedTokensList, this)
             }
         }
@@ -275,6 +302,12 @@ class TokensFragment : Fragment() {
         selectedTokensList.clear()
 
         tokensAdapter.notifyDataSetChanged()
+    }
+
+    private fun clearPreviousFields() {
+        previousSelectedTokensList.clear()
+        previousTokenSum = 0f
+        previousTokenValues = arrayOf()
     }
 
     @SuppressLint("SetTextI18n")
