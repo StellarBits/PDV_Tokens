@@ -36,7 +36,8 @@ class TokensFragment : Fragment() {
             (requireActivity().application as AndroidPdvApplication).database.tokensDao(),
             (requireActivity().application as AndroidPdvApplication).database.reportDao(),
             (requireActivity().application as AndroidPdvApplication).database.layoutSettingsDao(),
-            (requireActivity().application as AndroidPdvApplication).database.sangriaDao()
+            (requireActivity().application as AndroidPdvApplication).database.sangriaDao(),
+            (requireActivity().application as AndroidPdvApplication).database.reportErrorDao()
         )
     }
 
@@ -80,6 +81,17 @@ class TokensFragment : Fragment() {
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton("Sim") { _, _ ->
                     findNavController().navigate(R.id.finalCashFragment)
+                }
+                .setNegativeButton("Não", null).show()
+        }
+
+        binding.btError.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Atenção!")
+                .setMessage("Deseja realmente reportar um erro de R$ ${String.format("%.2f", previousTokenSum)} na impressão?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Sim") { _, _ ->
+                    viewModel.insertError(previousTokenSum)
                 }
                 .setNegativeButton("Não", null).show()
         }

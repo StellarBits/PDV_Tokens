@@ -30,7 +30,8 @@ class FinalCashFragment : Fragment() {
     private val viewModel: FinalCashViewModel by activityViewModels {
         FinalCashViewModelFactory(
             (requireActivity().application as AndroidPdvApplication).database.reportDao(),
-            (requireActivity().application as AndroidPdvApplication).database.sangriaDao()
+            (requireActivity().application as AndroidPdvApplication).database.sangriaDao(),
+            (requireActivity().application as AndroidPdvApplication).database.reportErrorDao()
         )
     }
 
@@ -76,120 +77,143 @@ class FinalCashFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     @SuppressLint("SimpleDateFormat")
     private fun printReport() {
-        viewModel.getSangria()
-        viewModel.sangria.observe(viewLifecycleOwner) { sangria ->
+        viewModel.getErrors()
+        viewModel.error.observe(viewLifecycleOwner) { error ->
 
-            viewModel.getReport()
-            viewModel.report.observe(viewLifecycleOwner) { report ->
+            viewModel.getSangria()
+            viewModel.sangria.observe(viewLifecycleOwner) { sangria ->
 
-                // ------------------------- DATE ------------------------- //
+                viewModel.getReport()
+                viewModel.report.observe(viewLifecycleOwner) { report ->
 
-                val calendar = Calendar.getInstance()
-                val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+                    // ------------------------- DATE ------------------------- //
 
-                val initialDate = format.format(report.initialDate)
-                val finalDate = format.format(calendar.time)
+                    val calendar = Calendar.getInstance()
+                    val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
 
-                // ------------------------- DATE ------------------------- //
+                    val initialDate = format.format(report.initialDate)
+                    val finalDate = format.format(calendar.time)
 
-                // ------------------------- CALC ------------------------- //
+                    // ------------------------- DATE ------------------------- //
 
-                // Cash Register
-                val initialValue = report.initialCash
-                val finalValue =
-                    if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
-                        binding.edtFinalCash.text.toString()
-                            .replace("R$", "")
-                            .replace(".", "")
-                            .replace(",", ".")
-                            .trim()
-                            .toFloat()
+                    // ------------------------- CALC ------------------------- //
+
+                    // Cash Register
+                    val initialValue = report.initialCash
+                    val finalValue =
+                        if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
+                            binding.edtFinalCash.text.toString()
+                                .replace("R$", "")
+                                .replace(".", "")
+                                .replace(",", ".")
+                                .trim()
+                                .toFloat()
+                        }
+
+                    // Tokens
+                    val formattedTokensOneSold = report.cashOneTokensSold.toString().padEnd(6 - (report.cashOneTokensSold.toString().length + 1), ' ')
+                    val formattedTokensTwoSold = report.cashTwoTokensSold.toString().padEnd(6 - (report.cashTwoTokensSold.toString().length + 1), ' ')
+                    val formattedTokensFourSold = report.cashFourTokensSold.toString().padEnd(6 - (report.cashFourTokensSold.toString().length + 1), ' ')
+                    val formattedTokensFiveSold = report.cashFiveTokensSold.toString().padEnd(6 - (report.cashFiveTokensSold.toString().length + 1), ' ')
+                    val formattedTokensSixSold = report.cashSixTokensSold.toString().padEnd(6 - (report.cashSixTokensSold.toString().length + 1), ' ')
+                    val formattedTokensEightSold = report.cashEightTokensSold.toString().padEnd(6 - (report.cashEightTokensSold.toString().length + 1), ' ')
+                    val formattedTokensTenSold = report.cashTenTokensSold.toString().padEnd(6 - (report.cashTenTokensSold.toString().length + 1), ' ')
+
+                    val tokensOneSold = report.cashOneTokensSold
+                    val tokensTwoSold = report.cashTwoTokensSold
+                    val tokensFourSold = report.cashFourTokensSold
+                    val tokensFiveSold = report.cashFiveTokensSold
+                    val tokensSixSold = report.cashSixTokensSold
+                    val tokensEightSold = report.cashEightTokensSold
+                    val tokensTenSold = report.cashTenTokensSold
+
+                    val totalTokensOne = tokensOneSold.toFloat()
+                    val totalTokensTwo = 2 * tokensTwoSold.toFloat()
+                    val totalTokensFour = 4 * tokensFourSold.toFloat()
+                    val totalTokensFive = 5 * tokensFiveSold.toFloat()
+                    val totalTokensSix = 6 * tokensSixSold.toFloat()
+                    val totalTokensEight = 8 * tokensEightSold.toFloat()
+                    val totalTokensTen = 10 * tokensTenSold.toFloat()
+
+                    val tokensTotal = totalTokensOne + totalTokensTwo + totalTokensFour + totalTokensFive + totalTokensSix + totalTokensEight + totalTokensTen
+
+                    // Sangria
+                    val sangriaSum = sangria.sumOf { it.sangria.toDouble() }.toFloat()
+
+                    // Errors
+                    val errorSum = error.sumOf { it.error.toDouble() }.toFloat()
+
+                    // Balance
+                    val balance = initialValue + tokensTotal - sangriaSum // Abertura + Vendas - Sangrias
+
+                    // ------------------------- CALC ------------------------- //
+
+                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                    printSpace(1)
+                    printHelper.printData(Utils.getDeviceName(), 70, 1, false, 1, 80, 1)
+                    printSpace(1)
+                    printHelper.printData("Abertura:\n$initialDate - R$ ${String.format("%.2f", initialValue)}", 30, 0, false, 0, 80, 0)
+                    printSpace(1)
+                    printHelper.printData("Fechamento:\n$finalDate - R$ ${String.format("%.2f", finalValue)}", 30, 0, false, 0, 80, 0)
+                    printSpace(1)
+                    printHelper.printData("Saldo (Abertura + Vendas - Sangrias):\nR$ ${String.format("%.2f", balance)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                    printSpace(1)
+                    printHelper.printData("R$ 1,00  - Qtde x $formattedTokensOneSold - Total R$: ${String.format("%.2f", totalTokensOne)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 2,00  - Qtde x $formattedTokensTwoSold - Total R$: ${String.format("%.2f", totalTokensTwo)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 4,00  - Qtde x $formattedTokensFourSold - Total R$: ${String.format("%.2f", totalTokensFour)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 5,00  - Qtde x $formattedTokensFiveSold - Total R$: ${String.format("%.2f", totalTokensFive)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 6,00  - Qtde x $formattedTokensSixSold - Total R$: ${String.format("%.2f", totalTokensSix)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 8,00  - Qtde x $formattedTokensEightSold - Total R$: ${String.format("%.2f", totalTokensEight)}", 26, 0, false, 0, 80, 0)
+                    printHelper.printData("R$ 10,00 - Qtde x $formattedTokensTenSold - Total R$: ${String.format("%.2f", totalTokensTen)}", 26, 0, false, 0, 80, 0)
+                    printSpace(1)
+                    printHelper.printData("Total de vendas R$: ${String.format("%.2f", tokensTotal)}", 30, 0, false, 0, 80, 1)
+                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+                    printSpace(1)
+                    printHelper.printData("Total Dinheiro ..... R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("Total Pix .......... R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("Total Débito ....... R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("Total Crédito ...... R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("Abertura do caixa .. R$: ${String.format("%.2f", report.initialCash)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("Total Geral ........ R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit + report.initialCash)}", 30, 0, false, 0, 80, 0)
+                    printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
+
+                    // Sangria
+                    printSpace(1)
+                    printHelper.printData("Sangria:", 30, 0, false, 0, 80, 0)
+
+                    sangria.forEach {
+                        val date = format.format(it.date)
+                        val text = "$date - R$: ${String.format("%.2f", it.sangria)}"
+                        printHelper.printData(text, 30, 0, false, 0, 80, 0)
                     }
 
-                // Tokens
-                val formattedTokensOneSold = report.cashOneTokensSold.toString().padEnd(6 - (report.cashOneTokensSold.toString().length + 1), ' ')
-                val formattedTokensTwoSold = report.cashTwoTokensSold.toString().padEnd(6 - (report.cashTwoTokensSold.toString().length + 1), ' ')
-                val formattedTokensFourSold = report.cashFourTokensSold.toString().padEnd(6 - (report.cashFourTokensSold.toString().length + 1), ' ')
-                val formattedTokensFiveSold = report.cashFiveTokensSold.toString().padEnd(6 - (report.cashFiveTokensSold.toString().length + 1), ' ')
-                val formattedTokensSixSold = report.cashSixTokensSold.toString().padEnd(6 - (report.cashSixTokensSold.toString().length + 1), ' ')
-                val formattedTokensEightSold = report.cashEightTokensSold.toString().padEnd(6 - (report.cashEightTokensSold.toString().length + 1), ' ')
-                val formattedTokensTenSold = report.cashTenTokensSold.toString().padEnd(6 - (report.cashTenTokensSold.toString().length + 1), ' ')
+                    printSpace(1)
+                    printHelper.printData("Total das sangrias R$: ${String.format("%.2f", sangriaSum)}", 30, 0, false, 0, 80, 0)
 
-                val tokensOneSold = report.cashOneTokensSold
-                val tokensTwoSold = report.cashTwoTokensSold
-                val tokensFourSold = report.cashFourTokensSold
-                val tokensFiveSold = report.cashFiveTokensSold
-                val tokensSixSold = report.cashSixTokensSold
-                val tokensEightSold = report.cashEightTokensSold
-                val tokensTenSold = report.cashTenTokensSold
+                    // Errors
+                    printSpace(1)
+                    printHelper.printData("Erros reportados:", 30, 0, false, 0, 80, 0)
 
-                val totalTokensOne = tokensOneSold.toFloat()
-                val totalTokensTwo = 2 * tokensTwoSold.toFloat()
-                val totalTokensFour = 4 * tokensFourSold.toFloat()
-                val totalTokensFive = 5 * tokensFiveSold.toFloat()
-                val totalTokensSix = 6 * tokensSixSold.toFloat()
-                val totalTokensEight = 8 * tokensEightSold.toFloat()
-                val totalTokensTen = 10 * tokensTenSold.toFloat()
+                    error.forEach {
+                        val date = format.format(it.date)
+                        val text = "$date - R$: ${String.format("%.2f", it.error)}"
+                        printHelper.printData(text, 30, 0, false, 0, 80, 0)
+                    }
 
-                val tokensTotal = totalTokensOne + totalTokensTwo + totalTokensFour + totalTokensFive + totalTokensSix + totalTokensEight + totalTokensTen
+                    printSpace(1)
+                    printHelper.printData("Total dos erros reportados R$: ${String.format("%.2f", errorSum)}", 30, 0, false, 0, 80, 0)
 
-                // Sangria
-                val sangriaSum = sangria.sumOf { it.sangria.toDouble() }.toFloat()
+                    printSpace(3)
+                    printHelper.printStart()
+                    printHelper.cutPaper(1)
 
-                // Balance
-                val balance = initialValue + tokensTotal - sangriaSum // Abertura + Vendas - Sangrias
+                    viewModel.reportSangria()
+                    viewModel.reportErrors()
+                    viewModel.closeCashRegister(finalValue, calendar)
 
-                // ------------------------- CALC ------------------------- //
-
-                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                printSpace(1)
-                printHelper.printData(Utils.getDeviceName(), 70, 1, false, 1, 80, 1)
-                printSpace(1)
-                printHelper.printData("Abertura:\n$initialDate - R$ ${String.format("%.2f", initialValue)}", 30, 0, false, 0, 80, 0)
-                printSpace(1)
-                printHelper.printData("Fechamento:\n$finalDate - R$ ${String.format("%.2f", finalValue)}", 30, 0, false, 0, 80, 0)
-                printSpace(1)
-                printHelper.printData("Saldo (Abertura + Vendas - Sangrias):\nR$ ${String.format("%.2f", balance)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                printSpace(1)
-                printHelper.printData("R$ 1,00  - Qtde x $formattedTokensOneSold - Total R$: ${String.format("%.2f", totalTokensOne)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 2,00  - Qtde x $formattedTokensTwoSold - Total R$: ${String.format("%.2f", totalTokensTwo)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 4,00  - Qtde x $formattedTokensFourSold - Total R$: ${String.format("%.2f", totalTokensFour)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 5,00  - Qtde x $formattedTokensFiveSold - Total R$: ${String.format("%.2f", totalTokensFive)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 6,00  - Qtde x $formattedTokensSixSold - Total R$: ${String.format("%.2f", totalTokensSix)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 8,00  - Qtde x $formattedTokensEightSold - Total R$: ${String.format("%.2f", totalTokensEight)}", 26, 0, false, 0, 80, 0)
-                printHelper.printData("R$ 10,00 - Qtde x $formattedTokensTenSold - Total R$: ${String.format("%.2f", totalTokensTen)}", 26, 0, false, 0, 80, 0)
-                printSpace(1)
-                printHelper.printData("Total de vendas R$: ${String.format("%.2f", tokensTotal)}", 30, 0, false, 0, 80, 1)
-                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                printSpace(1)
-                printHelper.printData("Total Dinheiro ..... R$: ${String.format("%.2f", report.paymentCash)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Pix .......... R$: ${String.format("%.2f", report.paymentPix)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Débito ....... R$: ${String.format("%.2f", report.paymentDebit)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Crédito ...... R$: ${String.format("%.2f", report.paymentCredit)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Abertura do caixa .. R$: ${String.format("%.2f", report.initialCash)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("Total Geral ........ R$: ${String.format("%.2f", report.paymentCash + report.paymentPix + report.paymentDebit + report.paymentCredit + report.initialCash)}", 30, 0, false, 0, 80, 0)
-                printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-                printSpace(1)
-                printHelper.printData("Sangria:", 30, 0, false, 0, 80, 0)
-
-                sangria.forEach {
-                    val date = format.format(it.date)
-                    val text = "$date - R$: ${String.format("%.2f", it.sangria)}"
-                    printHelper.printData(text, 30, 0, false, 0, 80, 0)
+                    findNavController().navigate(R.id.initialCashFragment)
                 }
-
-                printSpace(1)
-                printHelper.printData("Total das sangrias R$: ${String.format("%.2f", sangriaSum)}", 30, 0, false, 0, 80, 0)
-
-                printSpace(3)
-                printHelper.printStart()
-                printHelper.cutPaper(1)
-
-                viewModel.reportSangria()
-                viewModel.closeCashRegister(finalValue, calendar)
-
-                findNavController().navigate(R.id.initialCashFragment)
             }
         }
     }

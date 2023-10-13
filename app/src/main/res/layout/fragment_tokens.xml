@@ -81,6 +81,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_total_title" />
 
+        <Button
+            android:id="@+id/bt_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Reportar erro"
+            android:backgroundTint="@color/darkest_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_tota_value">
+
+        </Button>
+
         <GridLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -89,7 +102,7 @@
             app:layout_constraintBottom_toTopOf="@+id/bt_sangria"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_tota_value">
+            app:layout_constraintTop_toBottomOf="@+id/bt_error">
 
             <Button
                 android:id="@+id/bt_cash"
