@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_initialCashFragment_to_configureTokenLayoutFragment"
             app:destination="@id/configureTokenLayoutFragment" />
+        <action
+            android:id="@+id/action_initialCashFragment_to_reprintFragment"
+            app:destination="@id/reprintFragment" />
     </fragment>
     <fragment
         android:id="@+id/registerTokenFragment"
@@ -55,4 +58,9 @@
         android:name="com.stellarbitsapps.androidpdv.ui.finalcash.FinalCashFragment"
         android:label="fragment_final_cash"
         tools:layout="@layout/fragment_final_cash" />
+    <fragment
+        android:id="@+id/reprintFragment"
+        android:name="com.stellarbitsapps.androidpdv.ui.reprint.ReprintFragment"
+        android:label="fragment_reprint"
+        tools:layout="@layout/fragment_reprint" />
 </navigation>

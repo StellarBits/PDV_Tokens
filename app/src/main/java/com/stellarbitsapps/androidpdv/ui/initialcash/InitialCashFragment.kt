@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -16,10 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.android.sublcdlibrary.SubLcdHelper
-import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
-import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.databinding.FragmentInitialCashBinding
 import com.stellarbitsapps.androidpdv.util.Utils
@@ -117,6 +114,11 @@ class InitialCashFragment : Fragment(), SubLcdHelper.VuleCalBack {
 
             R.id.configure_tokens_layout -> {
                 findNavController().navigate(R.id.configureTokenLayoutFragment)
+                true
+            }
+
+            R.id.reprint_report -> {
+                findNavController().navigate(R.id.reprintFragment)
                 true
             }
 

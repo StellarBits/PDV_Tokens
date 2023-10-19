@@ -16,13 +16,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.serenegiant.utils.UIThreadHelper.runOnUiThread
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
 import com.stellarbitsapps.androidpdv.databinding.FragmentTokensBinding
+import com.stellarbitsapps.androidpdv.ui.MainActivity
 import com.stellarbitsapps.androidpdv.ui.adapter.TokensAdapter
+import com.stellarbitsapps.androidpdv.ui.custom.dialog.ProgressHUD
 import com.stellarbitsapps.androidpdv.util.Utils
 
 
@@ -45,6 +48,10 @@ class TokensFragment : Fragment() {
     private val binding: FragmentTokensBinding by lazy {
         FragmentTokensBinding.inflate(layoutInflater)
     }
+
+    private lateinit var printHelper: AP80PrintHelper
+
+    private lateinit var progressHUD: ProgressHUD
 
     private lateinit var tokensAdapter: TokensAdapter
 
@@ -70,6 +77,9 @@ class TokensFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        printHelper = AP80PrintHelper.getInstance()
+        printHelper.initPrint(requireContext())
+
         initRecyclerView()
 
         loadTokenLayoutSettings()
@@ -99,7 +109,7 @@ class TokensFragment : Fragment() {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton("Sim") { _, _ ->
                         tokenPayment(viewModel, tokenSettings, previousTokenValues, previousSelectedTokensList, this)
-                        viewModel.insertError(previousTokenSum)
+                        viewModel.insertError(previousTokenSum, MainActivity.currentReportId)
                     }
                     .setNegativeButton("Não", null).show()
             } else {
@@ -168,11 +178,11 @@ class TokensFragment : Fragment() {
         }
 
         binding.btChange.setOnClickListener {
-            Utils.showCashDialog(this, viewModel, false, if (tokenSum == 0f) previousTokenSum else tokenSum)
+            Utils.showCashDialog(this, viewModel, false, if (tokenSum == 0f) previousTokenSum else tokenSum, printHelper)
         }
 
         binding.btSangria.setOnClickListener {
-            Utils.showCashDialog(this, viewModel, true, tokenSum)
+            Utils.showCashDialog(this, viewModel, true, tokenSum, printHelper)
         }
 
         return binding.root
@@ -206,23 +216,6 @@ class TokensFragment : Fragment() {
         selectedTokensList: ArrayList<Tokens>,
         fragment: TokensFragment
     ) {
-        val progressBar = ProgressBar(requireContext())
-        val progressLayout = LinearLayout(requireContext())
-
-        val params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        progressLayout.orientation = LinearLayout.VERTICAL
-        progressLayout.gravity = Gravity.CENTER
-        progressLayout.addView(progressBar, params)
-
-        val progressBarDialogBuilder = AlertDialog.Builder(requireContext())
-        progressBarDialogBuilder.setView(progressLayout)
-        progressBarDialogBuilder.setCancelable(false)
-        val progressBarDialog = progressBarDialogBuilder.create()
-
         if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
             val builder = AlertDialog.Builder(fragment.requireContext())
 
@@ -242,13 +235,14 @@ class TokensFragment : Fragment() {
                                 tokenSettings,
                                 tokenValues,
                                 selectedTokensList,
-                                fragment
+                                fragment,
+                                printHelper
                             )
 
                             // Update UI
                             runOnUiThread {
                                 clearFields()
-                                progressBarDialog.dismiss()
+                                progressHUD.dismiss()
                             }
                         } catch (ex: Exception) {
                             ex.printStackTrace()
@@ -256,7 +250,12 @@ class TokensFragment : Fragment() {
                     }
                 }.start()
 
-                progressBarDialog.show()
+                progressHUD = ProgressHUD.show(
+                    context, "Imprimindo fichas",
+                    cancelable = false,
+                    spinnerGone = false
+                )
+                progressHUD.show()
             }
 
             builder.setNegativeButton("Não") { dialog, _ ->
@@ -276,13 +275,14 @@ class TokensFragment : Fragment() {
                             tokenSettings,
                             tokenValues,
                             selectedTokensList,
-                            fragment
+                            fragment,
+                            printHelper
                         )
 
                         // Update UI
                         runOnUiThread {
                             clearFields()
-                            progressBarDialog.dismiss()
+                            progressHUD.dismiss()
                         }
                     } catch (ex: Exception) {
                         ex.printStackTrace()
@@ -290,7 +290,12 @@ class TokensFragment : Fragment() {
                 }
             }.start()
 
-            progressBarDialog.show()
+            progressHUD = ProgressHUD.show(
+                context, "Imprimindo fichas",
+                cancelable = false,
+                spinnerGone = false
+            )
+            progressHUD.show()
         }
     }
 

@@ -9,6 +9,7 @@ import com.stellarbitsapps.androidpdv.database.dao.ReportDao
 import com.stellarbitsapps.androidpdv.database.dao.SangriaDao
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.ReportError
+import com.stellarbitsapps.androidpdv.database.entity.ReprintReport
 import com.stellarbitsapps.androidpdv.database.entity.Sangria
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -19,7 +20,7 @@ class FinalCashViewModel(
     private val reportErrorDao: ReportErrorDao
 ) : ViewModel() {
 
-    val report = MutableLiveData<Report>()
+    val report = MutableLiveData<ReprintReport>()
 
     val sangria = MutableLiveData<List<Sangria>>()
 
@@ -33,31 +34,15 @@ class FinalCashViewModel(
         }
     }
 
-    fun closeCashRegister(finalValue: Float, calendar: Calendar) {
+    fun closeCashRegister(finalDate: Long, finalValue: Float) {
         viewModelScope.launch {
-            reportDao.updateReportFinalValue(finalValue, calendar.timeInMillis)
-        }
-    }
-
-    fun getSangria() {
-        viewModelScope.launch {
-            sangriaDao.getAll().collect {
-                sangria.postValue(it)
-            }
+            reportDao.updateReportFinalValue(finalDate, finalValue)
         }
     }
 
     fun reportSangria() {
         viewModelScope.launch {
             sangriaDao.reportSangria()
-        }
-    }
-
-    fun getErrors() {
-        viewModelScope.launch {
-            reportErrorDao.getAll().collect {
-                error.postValue(it)
-            }
         }
     }
 
