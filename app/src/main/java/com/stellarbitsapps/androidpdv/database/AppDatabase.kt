@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 import com.stellarbitsapps.androidpdv.database.dao.LayoutSettingsDao
 import com.stellarbitsapps.androidpdv.database.dao.ReportDao
 import com.stellarbitsapps.androidpdv.database.dao.ReportErrorDao
+import com.stellarbitsapps.androidpdv.database.dao.ReprintReportDao
 import com.stellarbitsapps.androidpdv.database.dao.SangriaDao
 import com.stellarbitsapps.androidpdv.database.dao.TokensDao
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
@@ -18,9 +19,9 @@ import com.stellarbitsapps.androidpdv.database.entity.Tokens
 
 
 @Database(
-    version = 2,
+    version = 3,
     entities = [Tokens::class, Report::class, LayoutSettings::class, Sangria::class, ReportError::class],
-    autoMigrations = [AutoMigration (from = 1, to = 2)],
+    autoMigrations = [AutoMigration (from = 1, to = 2), AutoMigration (from = 2, to = 3)],
     exportSchema = true
 )
 abstract class AppDatabase: RoomDatabase() {
@@ -29,6 +30,7 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun layoutSettingsDao(): LayoutSettingsDao
     abstract fun sangriaDao(): SangriaDao
     abstract fun reportErrorDao(): ReportErrorDao
+    abstract fun reprintReport(): ReprintReportDao
 
     companion object {
         @Volatile

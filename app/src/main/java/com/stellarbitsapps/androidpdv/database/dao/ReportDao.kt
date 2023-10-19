@@ -5,13 +5,23 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.stellarbitsapps.androidpdv.database.entity.Report
+import com.stellarbitsapps.androidpdv.database.entity.ReprintReport
 import kotlinx.coroutines.flow.Flow
 
 const val WHERE_CLAUSE = "((strftime('%Y-%m-%d', datetime(initial_date / 1000, 'unixepoch', 'localtime')) = strftime('%Y-%m-%d', 'now', 'localtime')) and final_date is NULL)"
 @Dao
 interface ReportDao {
-    @Query("SELECT * FROM report WHERE $WHERE_CLAUSE")
-    fun getAll(): Flow<Report>
+    @Query("SELECT r.* FROM report r " +
+            "LEFT JOIN Sangria s ON r.id = s.report_id " +
+            "LEFT JOIN ReportError e ON r.id = e.report_id " +
+            "WHERE $WHERE_CLAUSE")
+    fun getAll(): Flow<ReprintReport>
+
+    @Query("SELECT * FROM report ORDER BY id")
+    fun getAllReports(): Flow<List<Report>>
+
+    @Query("SELECT id FROM report ORDER BY id DESC LIMIT 1")
+    fun getLastReportId(): Flow<Int>
 
     @Query("SELECT $WHERE_CLAUSE FROM report ORDER BY id DESC LIMIT 1")
     fun cashRegisterIsOpen(): Flow<Int>
@@ -47,7 +57,7 @@ interface ReportDao {
     )
 
     @Query("UPDATE report SET final_cash = :finalCash, final_date = :finalDate WHERE $WHERE_CLAUSE")
-    suspend fun updateReportFinalValue(finalCash: Float, finalDate: Long)
+    suspend fun updateReportFinalValue(finalDate: Long, finalCash: Float)
 
     @Query("DELETE FROM report WHERE $WHERE_CLAUSE")
     suspend fun deleteReport()

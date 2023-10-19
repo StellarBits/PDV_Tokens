@@ -10,6 +10,16 @@ import kotlinx.coroutines.launch
 class StartScreenViewModel(private val reportDao: ReportDao) : ViewModel() {
     val cashRegisterIsOpen = MutableLiveData<Boolean>()
 
+    val lastReportId = MutableLiveData<Int>()
+
+    fun getLastReportId() {
+        viewModelScope.launch {
+            reportDao.getLastReportId().collect {
+                lastReportId.postValue(it)
+            }
+        }
+    }
+
     fun cashRegisterIsOpen() {
         viewModelScope.launch {
             reportDao.cashRegisterIsOpen().collect {

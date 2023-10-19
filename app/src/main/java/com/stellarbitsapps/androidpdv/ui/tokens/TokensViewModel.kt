@@ -75,15 +75,15 @@ class TokensViewModel(
 
     private fun getRowsCount(): Flow<Int> = layoutSettingsDao.getRowsCount()
 
-    fun insertSangria(sangria: Float) {
+    fun insertSangria(sangria: Float, reportId: Int) {
         viewModelScope.launch {
-            sangriaDao.insertAll(Sangria(sangria = sangria))
+            sangriaDao.insertAll(Sangria(sangria = sangria, reportId = reportId))
         }
     }
 
-    fun insertError(error: Float) {
+    fun insertError(error: Float, reportId: Int) {
         viewModelScope.launch {
-            reportErrorDao.insertAll(ReportError(error = error))
+            reportErrorDao.insertAll(ReportError(error = error, reportId = reportId))
         }
     }
 }

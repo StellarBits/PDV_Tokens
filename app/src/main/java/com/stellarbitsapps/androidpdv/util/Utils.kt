@@ -2,12 +2,9 @@ package com.stellarbitsapps.androidpdv.util
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.ContentResolver
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,29 +19,31 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.android.sublcdlibrary.SubLcdHelper
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.Tokens
+import com.stellarbitsapps.androidpdv.ui.MainActivity
 import com.stellarbitsapps.androidpdv.ui.MainActivity.Companion.mainActivityContentResolver
-import com.stellarbitsapps.androidpdv.ui.MainActivity.Companion.printHelper
 import com.stellarbitsapps.androidpdv.ui.initialcash.InitialCashFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensViewModel
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.concurrent.Executors
 
 
 class Utils {
     companion object {
         @RequiresApi(Build.VERSION_CODES.N_MR1)
         @SuppressLint("SetTextI18n")
-        fun showCashDialog(fragment: Fragment, viewModel: TokensViewModel, isSangria: Boolean, tokenSum: Float) {
+        fun showCashDialog(
+            fragment: Fragment,
+            viewModel: TokensViewModel,
+            isSangria: Boolean,
+            tokenSum: Float,
+            printHelper: AP80PrintHelper
+        ) {
             val inflater = LayoutInflater.from(fragment.requireContext())
             val dialogLayout: View =
                 inflater.inflate(
@@ -91,8 +90,8 @@ class Utils {
                 }
 
                 if (isSangria) {
-                    printSangria(valueEntered)
-                    viewModel.insertSangria(valueEntered)
+                    PrintUtils.printSangria(valueEntered, printHelper)
+                    viewModel.insertSangria(valueEntered, MainActivity.currentReportId)
                 } else {
                     val cashChange = valueEntered - tokenSum
                     totalCashChangeTextView.text = "Troco: R$ " + String.format("%.2f", cashChange)
@@ -156,7 +155,8 @@ class Utils {
             tokenSettings: LayoutSettings,
             tokenValues: Array<Float>,
             selectedTokensList: ArrayList<Tokens>,
-            fragment: TokensFragment
+            fragment: TokensFragment,
+            printHelper: AP80PrintHelper
         ) {
             var tokenPaymentValues = tokenValues
 
@@ -195,7 +195,7 @@ class Utils {
                 auxTokensList.forEach { tokensPair ->
                     if (tokensPair.first > 0) {
                         for (i in 1..tokensPair.first) {
-                            printToken(tokensPair.second, tokenSettings, fragment)
+                            PrintUtils.printToken(tokensPair.second, tokenSettings, fragment, printHelper)
                             Thread.sleep(1250)
                         }
                     }
@@ -240,90 +240,6 @@ class Utils {
         @RequiresApi(Build.VERSION_CODES.N_MR1)
         fun getDeviceName(): String {
             return Settings.Global.getString(mainActivityContentResolver, Settings.Global.DEVICE_NAME)
-        }
-
-        @RequiresApi(Build.VERSION_CODES.N_MR1)
-        @SuppressLint("SimpleDateFormat")
-        private fun printSangria(sangria: Float) {
-            val calendar = Calendar.getInstance()
-            val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-            val date = format.format(calendar.time)
-
-            for (i in 1..2) {
-                printHelper.printData("Sangria: ${getDeviceName()}", 60, 1, false, 1, 80, 0)
-                printSpace(1)
-                printHelper.printData("R$ ${String.format("%.2f", sangria)}", 50, 0, false, 0, 80, 0)
-                printHelper.printData(date, 50, 0, false, 0, 80, 0)
-                printSpace(4)
-                printHelper.printData("ASS ..................................", 30, 0, false, 0, 80, 0)
-                printSpace(3)
-                printHelper.printStart()
-                printHelper.cutPaper(1)
-            }
-        }
-
-        private fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {
-            val constraintLayout = inflatedLayout.findViewById<View>(R.id.token_layout) as ConstraintLayout
-
-            constraintLayout.isDrawingCacheEnabled = true
-
-            constraintLayout.measure(
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-            )
-
-            constraintLayout.layout(0, 0, constraintLayout.measuredWidth, constraintLayout.measuredHeight)
-            constraintLayout.buildDrawingCache(true)
-
-            return constraintLayout.drawingCache
-        }
-
-        @SuppressLint("SimpleDateFormat", "InflateParams")
-        private fun printToken(
-            tokenValue: String,
-            tokenSettings: LayoutSettings,
-            fragment: TokensFragment
-        ) {
-            val calendar = Calendar.getInstance()
-            val format = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-            val date = format.format(calendar.time)
-
-            val tokenLayout = fragment.layoutInflater.inflate(R.layout.token_layout, null)
-
-            tokenLayout.findViewById<TextView>(R.id.tv_token_value).text = tokenValue
-
-            if (tokenSettings.image.isNotEmpty()) {
-                val myBitmap = BitmapFactory.decodeStream(
-                    fragment.requireActivity().contentResolver.openInputStream(tokenSettings.image.toUri())
-                )
-
-                tokenLayout.findViewById<ImageView>(R.id.img_token_image).setImageBitmap(myBitmap)
-            }
-
-            val bitmap = createBitmapFromConstraintLayout(tokenLayout)
-
-            printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printHelper.printData(tokenSettings.header, 35, 0, false, 1, 80, 0)
-            printHelper.printData("VALE $tokenValue", 80, 0, false, 1, 80, 0)
-            printHelper.printBitmap(bitmap, 2, 80)
-            printHelper.printData(date, 30, 0, false, 0, 80, 0)
-            printHelper.printData(tokenSettings.footer, 40, 0, false, 0, 80, 0)
-            printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
-            printSpace(2)
-            printHelper.printStart()
-            printHelper.cutPaper(1)
-            printHelper.clean()
-        }
-
-        private fun printSpace(spaceSize: Int) {
-            if (spaceSize < 0) {
-                return
-            }
-            val strSpace = StringBuilder()
-            for (i in 0 until spaceSize) {
-                strSpace.append("\n")
-            }
-            printHelper.printData(strSpace.toString(), 32, 0, false, 1, 80, 0)
         }
     }
 }
