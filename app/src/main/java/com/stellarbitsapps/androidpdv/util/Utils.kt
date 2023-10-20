@@ -153,6 +153,7 @@ class Utils {
         fun prepareAndPrintToken(
             viewModel: TokensViewModel,
             tokenSettings: LayoutSettings,
+            paymentMethod: String,
             tokenValues: Array<Float>,
             selectedTokensList: ArrayList<Tokens>,
             fragment: TokensFragment,
@@ -176,13 +177,6 @@ class Utils {
                     paymentDebit = tokenPaymentValues[2],
                     paymentCredit = tokenPaymentValues[3]
                 )
-
-                val paymentMethod =
-                    if (tokenPaymentValues[0] > 0) "Dinheiro"
-                    else if (tokenPaymentValues[1] > 0) "Pix"
-                    else if (tokenPaymentValues[2] > 0) "Débito"
-                    else if (tokenPaymentValues[3] > 0) "Crédito"
-                    else "Forma de pagamento inválida"
 
                 tokenPaymentValues = arrayOf(0f, 0f, 0f, 0f)
 

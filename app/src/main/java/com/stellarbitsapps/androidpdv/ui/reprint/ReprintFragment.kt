@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
@@ -20,6 +21,7 @@ import com.stellarbitsapps.androidpdv.ui.adapter.ReprintAdapter
 import com.stellarbitsapps.androidpdv.ui.adapter.ReprintListener
 import com.stellarbitsapps.androidpdv.ui.custom.dialog.ProgressHUD
 import com.stellarbitsapps.androidpdv.util.PrintUtils
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 
 class ReprintFragment : Fragment() {
@@ -43,6 +45,7 @@ class ReprintFragment : Fragment() {
 
     private lateinit var progressHUD: ProgressHUD
 
+    @SuppressLint("SimpleDateFormat")
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,35 +60,24 @@ class ReprintFragment : Fragment() {
 
         viewModel.reprintReport.observe(viewLifecycleOwner) {
 
-            object : Thread() {
-                @SuppressLint("SimpleDateFormat")
-                override fun run() {
-                    try {
-                        PrintUtils.printReport(
-                            report = it.report,
-                            sangrias = it.sangria,
-                            errors = it.error,
-                            finalDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(it.report.finalDate),
-                            it.report.finalCash,
-                            printHelper
-                        )
-
-                        // Update UI
-                        UIThreadHelper.runOnUiThread {
-                            progressHUD.dismiss()
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
-            }.start()
-
             progressHUD = ProgressHUD.show(
                 context, "Imprimindo relatório",
                 cancelable = false,
                 spinnerGone = false
             )
             progressHUD.show()
+
+            lifecycleScope.launch {
+                PrintUtils.printReport(
+                    report = it.report,
+                    sangrias = it.sangria,
+                    errors = it.error,
+                    finalDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(it.report.finalDate),
+                    it.report.finalCash,
+                    printHelper,
+                    progressHUD
+                )
+            }
         }
 
         initRecyclerView()
