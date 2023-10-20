@@ -16,8 +16,10 @@ import com.stellarbitsapps.androidpdv.database.entity.LayoutSettings
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.ReportError
 import com.stellarbitsapps.androidpdv.database.entity.Sangria
-import com.stellarbitsapps.androidpdv.ui.finalcash.FinalCashViewModel
+import com.stellarbitsapps.androidpdv.ui.custom.dialog.ProgressHUD
 import com.stellarbitsapps.androidpdv.ui.tokens.TokensFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
@@ -86,13 +88,14 @@ class PrintUtils {
 
         @RequiresApi(Build.VERSION_CODES.N_MR1)
         @SuppressLint("SimpleDateFormat")
-        fun printReport(
+        suspend fun printReport(
             report: Report,
             sangrias: List<Sangria>,
             errors: List<ReportError>,
             finalDate: String,
             finalValue: Float,
-            printHelper: AP80PrintHelper
+            printHelper: AP80PrintHelper,
+            progressHUD: ProgressHUD,
         ) {
             // ------------------------- DATE ------------------------- //
 
@@ -205,7 +208,11 @@ class PrintUtils {
             printHelper.cutPaper(1)
             printHelper.clean()
 
-            Thread.sleep(2500)
+            withContext(Dispatchers.IO) {
+                Thread.sleep(2500)
+            }
+
+            progressHUD.dismiss()
         }
     
         private fun createBitmapFromConstraintLayout(inflatedLayout: View): Bitmap {

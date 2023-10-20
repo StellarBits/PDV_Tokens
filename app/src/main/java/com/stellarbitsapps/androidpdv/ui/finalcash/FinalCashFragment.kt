@@ -12,15 +12,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.elotouch.AP80.sdkhelper.AP80PrintHelper
 import com.serenegiant.utils.UIThreadHelper
 import com.stellarbitsapps.androidpdv.R
 import com.stellarbitsapps.androidpdv.application.AndroidPdvApplication
 import com.stellarbitsapps.androidpdv.databinding.FragmentFinalCashBinding
+import com.stellarbitsapps.androidpdv.ui.MainActivity
 import com.stellarbitsapps.androidpdv.ui.custom.dialog.ProgressHUD
 import com.stellarbitsapps.androidpdv.util.PrintUtils
 import com.stellarbitsapps.androidpdv.util.Utils
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
@@ -82,66 +85,46 @@ class FinalCashFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     @SuppressLint("SimpleDateFormat")
     private fun printReport() {
+        val now = Calendar.getInstance().timeInMillis
+        val finalDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(now)
+        val finalValue =
+            if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
+                binding.edtFinalCash.text.toString()
+                    .replace("R$", "")
+                    .replace(".", "")
+                    .replace(",", ".")
+                    .trim()
+                    .toFloat()
+            }
+
+        progressHUD = ProgressHUD.show(
+            context, "Imprimindo relatório",
+            cancelable = false,
+            spinnerGone = false
+        )
+        progressHUD.show()
+
         viewModel.getReport()
         viewModel.report.observe(viewLifecycleOwner) {
-            object : Thread() {
-                @SuppressLint("SimpleDateFormat")
-                override fun run() {
-                    try {
-                        val now = Calendar.getInstance().timeInMillis
-                        val finalDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(now)
-                        val finalValue =
-                            if (binding.edtFinalCash.text.toString().isEmpty()) 0f else {
-                                binding.edtFinalCash.text.toString()
-                                    .replace("R$", "")
-                                    .replace(".", "")
-                                    .replace(",", ".")
-                                    .trim()
-                                    .toFloat()
-                            }
+            lifecycleScope.launch {
+                PrintUtils.printReport(
+                    it.report,
+                    it.sangria,
+                    it.error,
+                    finalDate,
+                    finalValue,
+                    printHelper,
+                    progressHUD
+                )
+            }
 
-                        PrintUtils.printReport(
-                            it.report,
-                            it.sangria,
-                            it.error,
-                            finalDate,
-                            finalValue,
-                            printHelper
-                        )
+            viewModel.reportSangria()
+            viewModel.reportErrors()
+            viewModel.closeCashRegister(now, finalValue)
 
-                        // Update UI
-                        UIThreadHelper.runOnUiThread {
-                            viewModel.reportSangria()
-                            viewModel.reportErrors()
-                            viewModel.closeCashRegister(now, finalValue)
+            MainActivity.currentReportId = it.report.id + 1
 
-                            findNavController().navigate(R.id.initialCashFragment)
-
-                            progressHUD.dismiss()
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
-            }.start()
-
-            progressHUD = ProgressHUD.show(
-                context, "Imprimindo relatório",
-                cancelable = false,
-                spinnerGone = false
-            )
-            progressHUD.show()
+            findNavController().navigate(R.id.initialCashFragment)
         }
-    }
-
-    private fun printSpace(spaceSize: Int) {
-        if (spaceSize < 0) {
-            return
-        }
-        val strSpace = StringBuilder()
-        for (i in 0 until spaceSize) {
-            strSpace.append("\n")
-        }
-        printHelper.printData(strSpace.toString(), 32, 0, false, 1, 80, 0)
     }
 }

@@ -216,6 +216,13 @@ class TokensFragment : Fragment() {
         selectedTokensList: ArrayList<Tokens>,
         fragment: TokensFragment
     ) {
+        val paymentMethod =
+            if (tokenValues[0] > 0) "Dinheiro"
+            else if (tokenValues[1] > 0) "Pix"
+            else if (tokenValues[2] > 0) "Débito"
+            else if (tokenValues[3] > 0) "Crédito"
+            else "Forma de pagamento inválida"
+
         if (tokenSettings.header.isEmpty() || tokenSettings.footer.isEmpty() || tokenSettings.image.isEmpty()) {
             val builder = AlertDialog.Builder(fragment.requireContext())
 
@@ -233,6 +240,7 @@ class TokensFragment : Fragment() {
                             Utils.prepareAndPrintToken(
                                 viewModel,
                                 tokenSettings,
+                                paymentMethod,
                                 tokenValues,
                                 selectedTokensList,
                                 fragment,
@@ -273,6 +281,7 @@ class TokensFragment : Fragment() {
                         Utils.prepareAndPrintToken(
                             viewModel,
                             tokenSettings,
+                            paymentMethod,
                             tokenValues,
                             selectedTokensList,
                             fragment,
