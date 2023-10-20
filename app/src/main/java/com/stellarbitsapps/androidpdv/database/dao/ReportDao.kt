@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.stellarbitsapps.androidpdv.database.entity.Report
 import com.stellarbitsapps.androidpdv.database.entity.ReprintReport
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 const val WHERE_CLAUSE = "((strftime('%Y-%m-%d', datetime(initial_date / 1000, 'unixepoch', 'localtime')) = strftime('%Y-%m-%d', 'now', 'localtime')) and final_date is NULL)"
 @Dao
 interface ReportDao {
+    @Transaction
     @Query("SELECT r.* FROM report r " +
             "LEFT JOIN Sangria s ON r.id = s.report_id " +
             "LEFT JOIN ReportError e ON r.id = e.report_id " +
