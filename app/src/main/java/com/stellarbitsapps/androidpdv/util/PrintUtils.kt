@@ -23,9 +23,11 @@ import java.util.Calendar
 
 class PrintUtils {
     companion object {
+        @RequiresApi(Build.VERSION_CODES.N_MR1)
         @SuppressLint("SimpleDateFormat", "InflateParams")
         fun printToken(
             tokenValue: String,
+            paymentMethod: String,
             tokenSettings: LayoutSettings,
             fragment: TokensFragment,
             printHelper: AP80PrintHelper
@@ -47,11 +49,13 @@ class PrintUtils {
             }
     
             val bitmap = createBitmapFromConstraintLayout(tokenLayout)
-    
+
+            printHelper.printData(Utils.getDeviceName(), 50, 1, false, 1, 80, 1)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
             printHelper.printData(tokenSettings.header, 35, 0, false, 1, 80, 0)
             printHelper.printData("VALE $tokenValue", 80, 0, false, 1, 80, 0)
             printHelper.printBitmap(bitmap, 2, 80)
+            printHelper.printData("Forma de pagamento: $paymentMethod", 30, 0, false, 0, 80, 0)
             printHelper.printData(date, 30, 0, false, 0, 80, 0)
             printHelper.printData(tokenSettings.footer, 40, 0, false, 0, 80, 0)
             printHelper.printData("______________________________________", 30, 0, false, 1, 80, 1)
